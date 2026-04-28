@@ -9,11 +9,18 @@ from typing import Any
 
 try:
     from ruamel.yaml import YAML as _YAML
-except ImportError as _e:
-    raise ImportError(
-        "ruamel.yaml is required for SFCodeAnalyzerManager. "
-        "Install it with: pip install 'salesforce-py[code-analyzer]'"
-    ) from _e
+
+    _RUAMEL_AVAILABLE = True
+except ImportError:
+    _RUAMEL_AVAILABLE = False
+
+
+def _require_ruamel() -> None:
+    if not _RUAMEL_AVAILABLE:
+        raise ImportError(
+            "ruamel.yaml is required for SFCodeAnalyzerManager. "
+            "Install it with: pip install 'salesforce-py[code-analyzer]'"
+        )
 
 from salesforce_py.exceptions import SalesforcePyError
 
@@ -31,8 +38,9 @@ _VALID_ENGINES: frozenset[str] = frozenset(
 _DEFAULT_CONFIG_NAMES: tuple[str, ...] = ("code-analyzer.yml", "code-analyzer.yaml")
 
 
-def _yaml() -> _YAML:
+def _yaml() -> "Any":
     """Return a ruamel YAML instance configured for round-trip editing."""
+    _require_ruamel()
     y = _YAML()
     y.default_flow_style = False
     y.preserve_quotes = True

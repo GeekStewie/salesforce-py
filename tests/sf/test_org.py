@@ -1,4 +1,4 @@
-"""Tests for salesforce_py.sf.org using the mock_runner fixture."""
+"""Tests for salesforce_py.sf.org.SFOrg."""
 
 from __future__ import annotations
 
@@ -6,119 +6,103 @@ from unittest.mock import patch
 
 import pytest
 
-from salesforce_py.sf.org import display, list_orgs, display_sync, list_orgs_sync
+from salesforce_py.sf.org import SFOrg
 
 
 # ---------------------------------------------------------------------------
-# list_orgs()
+# SFOrg initialisation
 # ---------------------------------------------------------------------------
 
 
-async def test_list_orgs_calls_correct_args(mock_runner, sample_org_list):
-    """list_orgs() must invoke run() with ['org', 'list']."""
-    mock_runner.return_value = sample_org_list
-
-    result = await list_orgs()
-
-    mock_runner.assert_awaited_once_with(["org", "list"])
-    assert result == sample_org_list
+def test_sforg_default_not_connected():
+    org = SFOrg("my-org")
+    assert not org.is_connected()
+    assert org.target_org == "my-org"
 
 
-async def test_list_orgs_returns_full_payload(mock_runner, sample_org_list):
-    """list_orgs() must return the full dict returned by run()."""
-    mock_runner.return_value = sample_org_list
-
-    result = await list_orgs()
-
-    assert "result" in result
-    assert len(result["result"]["nonScratchOrgs"]) == 1
-    assert len(result["result"]["scratchOrgs"]) == 1
-
-
-async def test_list_orgs_scratch_org_fields(mock_runner, sample_org_list):
-    """The scratch org entry must contain expected fields."""
-    mock_runner.return_value = sample_org_list
-
-    result = await list_orgs()
-
-    scratch = result["result"]["scratchOrgs"][0]
-    assert scratch["alias"] == "MyScratch"
-    assert scratch["isExpired"] is False
-    assert scratch["devHubUsername"] == "devhub@example.com"
-
-
-async def test_list_orgs_devhub_fields(mock_runner, sample_org_list):
-    """The DevHub org entry must have isDevHub=True."""
-    mock_runner.return_value = sample_org_list
-
-    result = await list_orgs()
-
-    devhub = result["result"]["nonScratchOrgs"][0]
-    assert devhub["isDevHub"] is True
-    assert devhub["alias"] == "DevHub"
+def test_sforg_none_target():
+    org = SFOrg()
+    assert org.target_org is None
 
 
 # ---------------------------------------------------------------------------
-# display()
+# SFOrg.env() — env dict composition
 # ---------------------------------------------------------------------------
 
 
-async def test_display_calls_correct_args(mock_runner):
-    """display() must invoke run() with the correct --target-org argument."""
-    mock_runner.return_value = {
-        "status": 0,
+def test_env_includes_sf_defaults():
+    org = SFOrg("test-org")
+    env = org.env()
+    assert env["SF_AUTOUPDATE_DISABLE"] == "true"
+    assert env["SF_DISABLE_TELEMETRY"] == "true"
+    assert env["SF_CONTAINER_MODE"] == "true"
+
+
+def test_env_injects_credentials_when_connected():
+    org = SFOrg("test-org")
+    org.instance_url = "https://login.salesforce.com"
+    org.access_token = "abc123"
+    org._connected = True
+
+    env = org.env()
+
+    assert env["SF_INSTANCE_URL"] == "https://login.salesforce.com"
+    assert env["SF_ACCESS_TOKEN"] == "abc123"
+
+
+def test_env_no_credentials_when_not_connected():
+    org = SFOrg("test-org")
+    env = org.env()
+    assert "SF_ACCESS_TOKEN" not in env
+    assert "SF_INSTANCE_URL" not in env
+
+
+# ---------------------------------------------------------------------------
+# SFOrg.connect() — uses subprocess via _run_raw
+# ---------------------------------------------------------------------------
+
+
+def test_connect_populates_fields(sample_org_list):
+    org = SFOrg("DevHub")
+    display_result = {
         "result": {
-            "orgId": "00D000000000001EAA",
-            "alias": "DevHub",
-            "username": "devhub@example.com",
             "instanceUrl": "https://login.salesforce.com",
-            "connectedStatus": "Connected",
-        },
+            "accessToken": "TOKEN",
+            "username": "devhub@example.com",
+            "id": "00D000000000001EAA",
+            "alias": "DevHub",
+            "isScratch": False,
+        }
     }
 
-    result = await display("DevHub")
+    with patch.object(org, "_run_raw", return_value=display_result):
+        success = org.connect()
 
-    mock_runner.assert_awaited_once_with(
-        ["org", "display", "--target-org", "DevHub"]
-    )
-    assert result["result"]["alias"] == "DevHub"
+    assert success is True
+    assert org.is_connected()
+    assert org.username == "devhub@example.com"
+    assert org.instance_url == "https://login.salesforce.com"
+    assert org.org_id == "00D000000000001EAA"
+    assert org.is_scratch is False
 
 
-async def test_display_passes_alias_correctly(mock_runner):
-    """display() must forward the alias argument verbatim."""
-    mock_runner.return_value = {"status": 0, "result": {}}
+def test_connect_returns_false_on_error():
+    org = SFOrg("bad-org")
+    from salesforce_py.exceptions import SalesforcePyError
 
-    await display("my-scratch-org@example.com")
+    with patch.object(org, "_run_raw", side_effect=SalesforcePyError("auth failed")):
+        success = org.connect()
 
-    args = mock_runner.call_args.args[0]
-    assert "--target-org" in args
-    target_index = args.index("--target-org")
-    assert args[target_index + 1] == "my-scratch-org@example.com"
+    assert success is False
+    assert not org.is_connected()
 
 
 # ---------------------------------------------------------------------------
-# Sync wrappers
+# SFOrg.__repr__
 # ---------------------------------------------------------------------------
 
 
-def test_list_orgs_sync_delegates_to_async(mock_runner, sample_org_list):
-    """list_orgs_sync() must return the same value as the async variant."""
-    mock_runner.return_value = sample_org_list
-
-    result = list_orgs_sync()
-
-    assert result == sample_org_list
-    mock_runner.assert_awaited_once_with(["org", "list"])
-
-
-def test_display_sync_delegates_to_async(mock_runner):
-    """display_sync() must return the same value as the async variant."""
-    expected = {"status": 0, "result": {"alias": "DevHub"}}
-    mock_runner.return_value = expected
-
-    result = display_sync("DevHub")
-
-    assert result == expected
-    mock_runner.assert_awaited_once_with(
-        ["org", "display", "--target-org", "DevHub"]
-    )
+def test_repr_includes_target_org():
+    org = SFOrg("my-org")
+    assert "my-org" in repr(org)
+    assert "False" in repr(org)
