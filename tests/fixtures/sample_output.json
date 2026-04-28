@@ -1,0 +1,37 @@
+{
+  "status": 0,
+  "result": {
+    "nonScratchOrgs": [
+      {
+        "orgId": "00D000000000001EAA",
+        "instanceUrl": "https://login.salesforce.com",
+        "loginUrl": "https://login.salesforce.com",
+        "username": "devhub@example.com",
+        "clientId": "PlatformCLI",
+        "connectedStatus": "Connected",
+        "isDevHub": true,
+        "alias": "DevHub",
+        "lastUsed": "2026-04-27T10:00:00.000Z",
+        "accessToken": "<redacted>"
+      }
+    ],
+    "scratchOrgs": [
+      {
+        "orgId": "00D000000000002EAA",
+        "instanceUrl": "https://cs1.salesforce.com",
+        "loginUrl": "https://test.salesforce.com",
+        "username": "test-abc123@example.com",
+        "clientId": "PlatformCLI",
+        "connectedStatus": "Connected",
+        "isDevHub": false,
+        "alias": "MyScratch",
+        "devHubUsername": "devhub@example.com",
+        "expirationDate": "2026-05-05",
+        "isExpired": false,
+        "lastUsed": "2026-04-28T08:30:00.000Z",
+        "accessToken": "<redacted>"
+      }
+    ]
+  },
+  "warnings": []
+}

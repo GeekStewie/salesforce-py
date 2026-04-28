@@ -1,0 +1,13 @@
+"""salesforce-py: Python wrapper for Salesforce CLIs and APIs."""
+
+from salesforce_py._version import __version__
+
+__all__ = ["__version__", "sf"]
+
+
+def __getattr__(name: str):  # noqa: ANN202
+    if name == "sf":
+        from salesforce_py import sf
+
+        return sf
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
