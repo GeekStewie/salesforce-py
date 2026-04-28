@@ -28,6 +28,13 @@ uv run ty check src/
 
 # Build distribution
 uv build
+
+# Publish to PyPI (requires ~/.pypirc with token)
+uv build && uv publish
+
+# Bump version then publish
+uv run hatch version patch   # or minor / major
+uv build && uv publish
 ```
 
 ## Architecture

@@ -1,5 +1,7 @@
 # salesforce-py
 
+> **Disclaimer:** This is an independent, community-maintained project and is **not affiliated with, endorsed by, or supported by Salesforce, Inc.** Salesforce, the Salesforce CLI, and related marks are trademarks of Salesforce, Inc.
+
 A Python wrapper for Salesforce CLIs and APIs. Currently provides a comprehensive sync wrapper for the [Salesforce CLI (`sf`)](https://developer.salesforce.com/tools/salesforcecli), with REST and Bulk API support planned.
 
 ## Requirements
@@ -153,5 +155,7 @@ uv run ty check src/
 This project is a personal open-source project, released under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
 
 You are free to use, modify, and distribute this software in accordance with the terms of the license. It is provided **as-is, without warranty of any kind** — express or implied — including but not limited to warranties of merchantability or fitness for a particular purpose. Use it at your own risk.
+
+This project is **not an official Salesforce product** and is not affiliated with or endorsed by Salesforce, Inc. in any way.
 
 See the [LICENSE](LICENSE) file for the full license text.
