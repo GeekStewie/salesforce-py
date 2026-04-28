@@ -150,4 +150,8 @@ uv run ty check src/
 
 ## License
 
-MIT
+This project is a personal open-source project, released under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
+
+You are free to use, modify, and distribute this software in accordance with the terms of the license. It is provided **as-is, without warranty of any kind** — express or implied — including but not limited to warranties of merchantability or fitness for a particular purpose. Use it at your own risk.
+
+See the [LICENSE](LICENSE) file for the full license text.

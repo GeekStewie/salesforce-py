@@ -8,6 +8,7 @@ dynamic = ["version"]
 description = "Python wrapper for Salesforce CLIs and APIs"
 readme = "README.md"
 license = { file = "LICENSE" }
+license-expression = "Apache-2.0"
 authors = [{ name = "Stewart Anderson", email = "stewart.anderson@live.co.uk" }]
 requires-python = ">=3.12"
 dependencies = []
