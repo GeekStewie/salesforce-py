@@ -543,7 +543,8 @@ class TestModelsClientFromEnv:
             signature=None,
             raw={},
         )
-        with patch("salesforce_py.models.client.fetch_token", new=AsyncMock(return_value=token_resp)):
+        mock_fetch = AsyncMock(return_value=token_resp)
+        with patch("salesforce_py.models.client.fetch_token", new=mock_fetch):
             client = await ModelsClient.from_env()
         assert client._session._access_token == ACCESS_TOKEN
         await client.close()
@@ -564,7 +565,8 @@ class TestModelsClientFromEnv:
             signature=None,
             raw={},
         )
-        with patch("salesforce_py.models.client.fetch_token", new=AsyncMock(return_value=token_resp)):
+        mock_fetch = AsyncMock(return_value=token_resp)
+        with patch("salesforce_py.models.client.fetch_token", new=mock_fetch):
             client = await ModelsClient.from_env()
         assert client._session._access_token == ACCESS_TOKEN
         await client.close()
@@ -585,7 +587,8 @@ class TestModelsClientFromEnv:
             signature=None,
             raw={},
         )
-        with patch("salesforce_py.models.client.fetch_token", new=AsyncMock(return_value=token_resp)):
+        mock_fetch = AsyncMock(return_value=token_resp)
+        with patch("salesforce_py.models.client.fetch_token", new=mock_fetch):
             client = await ModelsClient.from_env()
         assert client._session._base_url.startswith(geo_url)
         await client.close()
@@ -618,7 +621,8 @@ class TestModelsClientFromEnv:
             signature=None,
             raw={},
         )
-        with patch("salesforce_py.models.client.fetch_token", new=AsyncMock(return_value=token_resp)):
+        mock_fetch = AsyncMock(return_value=token_resp)
+        with patch("salesforce_py.models.client.fetch_token", new=mock_fetch):
             client = await ModelsClient.from_org(org, CONSUMER_KEY, CONSUMER_SECRET)
         assert client._session._access_token == ACCESS_TOKEN
         await client.close()

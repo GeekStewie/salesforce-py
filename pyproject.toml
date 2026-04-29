@@ -47,6 +47,10 @@ packages = ["src/salesforce_py"]
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
+addopts = "--ignore=tests/sf/test_live_org.py"
+markers = [
+    "integration: live Salesforce org tests — run manually with: uv run pytest tests/sf/test_live_org.py",
+]
 
 [tool.ruff]
 line-length = 100

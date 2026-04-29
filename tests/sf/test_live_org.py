@@ -22,7 +22,6 @@ from pathlib import Path
 import pytest
 
 from salesforce_py.sf import SFOrgTask
-from salesforce_py.exceptions import CLIError, SalesforcePyError
 
 TARGET_ORG = "sdonew"
 pytestmark = pytest.mark.integration
@@ -85,7 +84,10 @@ class TestOrgDisplay:
     def test_list_auth(self, task):
         auths = task.org.list_auth()
         assert isinstance(auths, list)
-        assert any(a.get("alias") == TARGET_ORG or a.get("username") == task._org.username for a in auths)
+        assert any(
+            a.get("alias") == TARGET_ORG or a.get("username") == task._org.username
+            for a in auths
+        )
 
     def test_list_users(self, task):
         users = task.org.list_users()
@@ -173,10 +175,9 @@ class TestSObject:
 
 def _soql_file(soql: str) -> Path:
     """Write SOQL to a temp file and return the path."""
-    f = tempfile.NamedTemporaryFile(mode="w", suffix=".soql", delete=False)
-    f.write(soql)
-    f.close()
-    return Path(f.name)
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".soql", delete=False) as f:
+        f.write(soql)
+        return Path(f.name)
 
 
 class TestDataQuery:

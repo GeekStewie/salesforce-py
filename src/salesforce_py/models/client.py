@@ -97,7 +97,7 @@ class ModelsClient:
         timeout: float = DEFAULT_TIMEOUT,
         http2: bool = True,
     ) -> ModelsClient:
-        """Create a :class:`ModelsClient` by minting a token from an :class:`~salesforce_py.sf.org.SFOrg`.
+        """Create a :class:`ModelsClient` via an :class:`~salesforce_py.sf.org.SFOrg`.
 
         Calls :meth:`~salesforce_py.sf.org.SFOrg._ensure_connected` to
         resolve the org's ``instance_url`` (used as ``my_domain``), then

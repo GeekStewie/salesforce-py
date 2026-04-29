@@ -136,7 +136,7 @@ class Data360Client:
         timeout: float = DEFAULT_TIMEOUT,
         http2: bool = True,
     ) -> Data360Client:
-        """Create a :class:`Data360Client` from an already-connected :class:`~salesforce_py.sf.org.SFOrg`.
+        """Create a :class:`Data360Client` from a connected :class:`~salesforce_py.sf.org.SFOrg`.
 
         Calls :meth:`~salesforce_py.sf.org.SFOrg._ensure_connected` to
         trigger lazy auth resolution, then forwards ``instance_url`` and
@@ -209,7 +209,7 @@ class Data360Client:
             import asyncio
             from salesforce_py.data360 import Data360Client
 
-            # With env vars SF_DATA360_CLIENT_ID / SF_DATA360_CLIENT_SECRET / SF_DATA360_INSTANCE_URL:
+            # With SF_DATA360_CLIENT_ID / SF_DATA360_CLIENT_SECRET / SF_DATA360_INSTANCE_URL:
             async def main():
                 async with await Data360Client.from_env() as client:
                     segments = await client.segments.get_segments()

@@ -18,13 +18,15 @@ credentials in this order:
 
 Environment variable prefixes per client:
 
-    ============  =====================  ======================  ====================
-    Client        CLIENT_ID              CLIENT_SECRET           INSTANCE_URL
-    ============  =====================  ======================  ====================
-    Connect       SF_CONNECT_CLIENT_ID   SF_CONNECT_CLIENT_SECRET  SF_CONNECT_INSTANCE_URL (or SF_INSTANCE_URL)
-    Data 360      SF_DATA360_CLIENT_ID   SF_DATA360_CLIENT_SECRET  SF_DATA360_INSTANCE_URL (or SF_INSTANCE_URL)
-    Models        SF_MODELS_CLIENT_ID    SF_MODELS_CLIENT_SECRET   SF_MODELS_INSTANCE_URL (or SF_INSTANCE_URL)
-    ============  =====================  ======================  ====================
+    ============  =====================  ========================  =======================
+    Client        CLIENT_ID              CLIENT_SECRET             INSTANCE_URL
+    ============  =====================  ========================  =======================
+    Connect       SF_CONNECT_CLIENT_ID   SF_CONNECT_CLIENT_SECRET  SF_CONNECT_INSTANCE_URL
+    Data 360      SF_DATA360_CLIENT_ID   SF_DATA360_CLIENT_SECRET  SF_DATA360_INSTANCE_URL
+    Models        SF_MODELS_CLIENT_ID    SF_MODELS_CLIENT_SECRET   SF_MODELS_INSTANCE_URL
+    ============  =====================  ========================  =======================
+
+All INSTANCE_URL vars fall back to ``SF_INSTANCE_URL`` when the prefixed form is absent.
 
 Note: The Models API requires ``sfap_api einstein_gpt_api api`` scopes on the
 External Client App — a standard SF CLI session token does **not** carry

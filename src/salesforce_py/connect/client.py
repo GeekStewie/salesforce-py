@@ -300,7 +300,7 @@ class ConnectClient:
         timeout: float = DEFAULT_TIMEOUT,
         http2: bool = True,
     ) -> ConnectClient:
-        """Create a :class:`ConnectClient` from an already-connected :class:`~salesforce_py.sf.org.SFOrg`.
+        """Create a :class:`ConnectClient` from a connected :class:`~salesforce_py.sf.org.SFOrg`.
 
         Calls :meth:`~salesforce_py.sf.org.SFOrg._ensure_connected` to
         trigger lazy auth resolution, then forwards ``instance_url`` and
@@ -373,7 +373,7 @@ class ConnectClient:
             import asyncio
             from salesforce_py.connect import ConnectClient
 
-            # With env vars SF_CONNECT_CLIENT_ID / SF_CONNECT_CLIENT_SECRET / SF_CONNECT_INSTANCE_URL:
+            # With SF_CONNECT_CLIENT_ID / SF_CONNECT_CLIENT_SECRET / SF_CONNECT_INSTANCE_URL:
             async def main():
                 async with await ConnectClient.from_env() as client:
                     feed = await client.chatter.get_feed_items()
