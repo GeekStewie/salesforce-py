@@ -81,6 +81,7 @@ class SFApiOperations(SFBaseOperations):
             label=f"{method.upper()} {url}",
             timeout=timeout,
             include_json=False,
+            include_api_version=False,
         )
 
     def get(

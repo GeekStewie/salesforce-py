@@ -42,7 +42,51 @@ pip install "salesforce-py[all]"
 
 The Models API uses a **client-credentials** OAuth flow distinct from standard Salesforce auth. You need an **External Client App** with the `sfap_api`, `einstein_gpt_api`, and `api` scopes, plus its consumer key/secret.
 
-Use `fetch_token` to mint a JWT:
+> **Important** — A standard SF CLI session token does **not** carry the `sfap_api` / `einstein_gpt_api` scopes. Client credentials are always required for `ModelsClient`; there is no SF CLI fallback.
+
+Three factory methods cover the common scenarios.
+
+### `from_env` — environment variables (recommended for CI/CD)
+
+Set `SF_MODELS_CLIENT_ID`, `SF_MODELS_CLIENT_SECRET`, and `SF_MODELS_INSTANCE_URL` (or `SF_INSTANCE_URL`), then call `from_env()`:
+
+```bash
+export SF_MODELS_CLIENT_ID="<consumer-key>"
+export SF_MODELS_CLIENT_SECRET="<consumer-secret>"
+export SF_MODELS_INSTANCE_URL="https://myorg.my.salesforce.com"
+```
+
+```python
+from salesforce_py.models import ModelsClient
+
+async with await ModelsClient.from_env() as client:
+    reply = await client.chat_generations.generate(model, messages)
+```
+
+`from_env` raises `SalesforcePyError` if the env vars are absent or incomplete.
+
+### `from_org` — resolve domain from SF CLI, supply client creds
+
+If you have an `SFOrgTask` in scope, `from_org` reads `instance_url` from the CLI session (so you don't need to hard-code the My Domain URL) and calls `fetch_token` with your credentials:
+
+```python
+from salesforce_py.sf import SFOrgTask
+from salesforce_py.models import ModelsClient
+
+task = SFOrgTask("my-org-alias")
+async with await ModelsClient.from_org(
+    task._org,
+    consumer_key="<CONSUMER_KEY>",
+    consumer_secret="<CONSUMER_SECRET>",
+) as client:
+    ...
+```
+
+`from_org` is an `async` classmethod — `await` it before the `async with`.
+
+### Direct construction
+
+Use `fetch_token` directly and pass the result in:
 
 ```python
 from salesforce_py.models import fetch_token, ModelsClient
@@ -60,7 +104,7 @@ async with ModelsClient(
     ...
 ```
 
-Or call the endpoint yourself and pass the resulting token to `ModelsClient`. The helper returns the full JSON body in `token.raw` if you need fields beyond `access_token` / `api_instance_url`.
+The helper returns the full JSON body in `token.raw` if you need fields beyond `access_token` / `api_instance_url`.
 
 > **Tip** — `api_instance_url` is geo-aware. If it's returned, use it as the client's `base_url` so requests land in the nearest data centre.
 

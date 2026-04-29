@@ -291,7 +291,7 @@ class SFDataOperations(SFBaseOperations):
         if query_file:
             args += ["--file", str(query_file)]
 
-        return self._run_capturing(args, label="Searching")
+        return self._run_capturing(args, label="Searching", include_json=False)
 
     # ------------------------------------------------------------------
     # Bulk job status

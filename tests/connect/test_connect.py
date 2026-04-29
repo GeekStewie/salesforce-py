@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
 import pytest
@@ -6440,3 +6440,73 @@ class TestPaymentsOperations:
         path = c._data_session.post.call_args[0][0]
         assert path == f"payments/link-to-order/{PAYMENT_LINK_ID}"
         await c.close()
+
+
+# ---------------------------------------------------------------------------
+# ConnectClient.from_env / from_org
+# ---------------------------------------------------------------------------
+
+
+class TestConnectClientFromEnv:
+    async def test_from_env_uses_client_creds(self, monkeypatch):
+        monkeypatch.setenv("SF_CONNECT_CLIENT_ID", "cid")
+        monkeypatch.setenv("SF_CONNECT_CLIENT_SECRET", "csecret")
+        monkeypatch.setenv("SF_CONNECT_INSTANCE_URL", INSTANCE_URL)
+
+        with patch(
+            "salesforce_py.connect.client.fetch_org_token",
+            new=AsyncMock(return_value=("tok", INSTANCE_URL)),
+        ):
+            client = await ConnectClient.from_env()
+        assert client._session._access_token == "tok"
+        await client.close()
+
+    async def test_from_env_uses_sf_instance_url_fallback(self, monkeypatch):
+        monkeypatch.setenv("SF_CONNECT_CLIENT_ID", "cid")
+        monkeypatch.setenv("SF_CONNECT_CLIENT_SECRET", "csecret")
+        monkeypatch.delenv("SF_CONNECT_INSTANCE_URL", raising=False)
+        monkeypatch.setenv("SF_INSTANCE_URL", INSTANCE_URL)
+
+        with patch(
+            "salesforce_py.connect.client.fetch_org_token",
+            new=AsyncMock(return_value=("tok", INSTANCE_URL)),
+        ):
+            client = await ConnectClient.from_env()
+        assert client._session._access_token == "tok"
+        await client.close()
+
+    async def test_from_env_falls_back_to_sf_cli(self, monkeypatch):
+        monkeypatch.delenv("SF_CONNECT_CLIENT_ID", raising=False)
+        monkeypatch.delenv("SF_CONNECT_CLIENT_SECRET", raising=False)
+
+        mock_org = MagicMock()
+        mock_org.instance_url = INSTANCE_URL
+        mock_org.access_token = ACCESS_TOKEN
+
+        with patch("salesforce_py.sf.org.SFOrg", return_value=mock_org):
+            client = await ConnectClient.from_env(target_org="my-alias")
+        assert client._session._access_token == ACCESS_TOKEN
+        await client.close()
+
+    async def test_from_env_raises_without_creds_or_org(self, monkeypatch):
+        monkeypatch.delenv("SF_CONNECT_CLIENT_ID", raising=False)
+        monkeypatch.delenv("SF_CONNECT_CLIENT_SECRET", raising=False)
+        with pytest.raises(SalesforcePyError, match="SF_CONNECT_CLIENT_ID"):
+            await ConnectClient.from_env()
+
+    async def test_from_env_raises_missing_instance_url(self, monkeypatch):
+        monkeypatch.setenv("SF_CONNECT_CLIENT_ID", "cid")
+        monkeypatch.setenv("SF_CONNECT_CLIENT_SECRET", "csecret")
+        monkeypatch.delenv("SF_CONNECT_INSTANCE_URL", raising=False)
+        monkeypatch.delenv("SF_INSTANCE_URL", raising=False)
+        with pytest.raises(SalesforcePyError, match="instance URL"):
+            await ConnectClient.from_env()
+
+    def test_from_org_uses_org_credentials(self):
+        mock_org = MagicMock()
+        mock_org.instance_url = INSTANCE_URL
+        mock_org.access_token = ACCESS_TOKEN
+
+        client = ConnectClient.from_org(mock_org)
+        assert client._session._access_token == ACCESS_TOKEN
+        assert client._session._instance_url == INSTANCE_URL

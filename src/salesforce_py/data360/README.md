@@ -34,24 +34,59 @@ pip install "salesforce-py[all]"
 
 ## Getting an access token
 
-`Data360Client` is token-driven — it does **not** perform OAuth on your behalf. You supply an `instance_url` and `access_token` from whatever auth flow you prefer.
+Three factory methods cover the common authentication scenarios.
 
-Data 360 authentication is separate from standard Salesforce OAuth — see the [OAuth and Connect REST API](https://developer.salesforce.com/docs/atlas.en-us.chatterapi.meta/chatterapi/intro_using_oauth.htm) docs and the [Data 360 Connect API Postman Collection](https://developer.salesforce.com/docs/platform/connectapi/guide/postman-collection.html) for the bootstrap flow. The returned `instance_url` is the Data 360 tenant URL (e.g. `https://datacloud-abc.my.salesforce.com`) — not the standard Salesforce org instance URL.
+### `from_env` — environment variables (recommended for CI/CD)
 
-For quick experimentation you can reuse the session the `sf` CLI already holds, but note that the resulting token may not be scoped for Data 360:
+Set environment variables and call `from_env()`. Credentials are resolved in this order:
+
+1. **Client credentials** — if `SF_DATA360_CLIENT_ID` and `SF_DATA360_CLIENT_SECRET` are both set, a `client_credentials` OAuth token is minted automatically. The My Domain URL is read from `SF_DATA360_INSTANCE_URL`, with `SF_INSTANCE_URL` as a fallback.
+2. **SF CLI session** — if `target_org` is passed and env creds are absent, credentials are read from the SF CLI auth store. Note: the resulting token may not carry Data 360 scopes depending on how the org was authenticated.
+3. Raises `SalesforcePyError` if neither path succeeds.
+
+```bash
+export SF_DATA360_CLIENT_ID="<consumer-key>"
+export SF_DATA360_CLIENT_SECRET="<consumer-secret>"
+export SF_DATA360_INSTANCE_URL="https://myorg.my.salesforce.com"
+```
+
+```python
+from salesforce_py.data360 import Data360Client
+
+async with await Data360Client.from_env() as client:
+    segments = await client.segments.get_segments()
+```
+
+Or fall back to the SF CLI (no env creds needed):
+
+```python
+async with await Data360Client.from_env("my-org-alias") as client:
+    segments = await client.segments.get_segments()
+```
+
+### `from_org` — SF CLI session
+
+Pass an `SFOrg` directly to reuse the CLI session token without env vars:
 
 ```python
 from salesforce_py.sf import SFOrgTask
 from salesforce_py.data360 import Data360Client
 
 task = SFOrgTask("my-org-alias")
-task.org._ensure_connected()
-
-async with Data360Client(
-    instance_url=task.org.instance_url,
-    access_token=task.org.access_token,
-) as client:
+async with Data360Client.from_org(task._org) as client:
     segments = await client.segments.get_segments()
+```
+
+### Direct construction
+
+Supply credentials explicitly — useful when you already hold a token from your own OAuth flow:
+
+```python
+async with Data360Client(
+    instance_url="https://myorg.my.salesforce.com",
+    access_token="<bearer-token>",
+) as client:
+    ...
 ```
 
 ## Client lifecycle

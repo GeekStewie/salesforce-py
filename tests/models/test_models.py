@@ -520,3 +520,105 @@ class TestSupportedModels:
 
     def test_supported_models_unique(self):
         assert len(SUPPORTED_MODELS) == len(set(SUPPORTED_MODELS))
+
+
+# ---------------------------------------------------------------------------
+# ModelsClient.from_env / from_org
+# ---------------------------------------------------------------------------
+
+
+class TestModelsClientFromEnv:
+    async def test_from_env_uses_client_creds(self, monkeypatch):
+        monkeypatch.setenv("SF_MODELS_CLIENT_ID", "kid")
+        monkeypatch.setenv("SF_MODELS_CLIENT_SECRET", "ksecret")
+        monkeypatch.setenv("SF_MODELS_INSTANCE_URL", MY_DOMAIN)
+
+        token_resp = TokenResponse(
+            access_token=ACCESS_TOKEN,
+            instance_url=MY_DOMAIN,
+            api_instance_url=None,
+            token_type="Bearer",
+            issued_at="0",
+            scope="sfap_api",
+            signature=None,
+            raw={},
+        )
+        with patch("salesforce_py.models.client.fetch_token", new=AsyncMock(return_value=token_resp)):
+            client = await ModelsClient.from_env()
+        assert client._session._access_token == ACCESS_TOKEN
+        await client.close()
+
+    async def test_from_env_uses_sf_instance_url_fallback(self, monkeypatch):
+        monkeypatch.setenv("SF_MODELS_CLIENT_ID", "kid")
+        monkeypatch.setenv("SF_MODELS_CLIENT_SECRET", "ksecret")
+        monkeypatch.delenv("SF_MODELS_INSTANCE_URL", raising=False)
+        monkeypatch.setenv("SF_INSTANCE_URL", MY_DOMAIN)
+
+        token_resp = TokenResponse(
+            access_token=ACCESS_TOKEN,
+            instance_url=MY_DOMAIN,
+            api_instance_url=None,
+            token_type="Bearer",
+            issued_at="0",
+            scope="sfap_api",
+            signature=None,
+            raw={},
+        )
+        with patch("salesforce_py.models.client.fetch_token", new=AsyncMock(return_value=token_resp)):
+            client = await ModelsClient.from_env()
+        assert client._session._access_token == ACCESS_TOKEN
+        await client.close()
+
+    async def test_from_env_uses_geo_routed_base_url(self, monkeypatch):
+        monkeypatch.setenv("SF_MODELS_CLIENT_ID", "kid")
+        monkeypatch.setenv("SF_MODELS_CLIENT_SECRET", "ksecret")
+        monkeypatch.setenv("SF_MODELS_INSTANCE_URL", MY_DOMAIN)
+
+        geo_url = "https://api.eu.salesforce.com"
+        token_resp = TokenResponse(
+            access_token=ACCESS_TOKEN,
+            instance_url=MY_DOMAIN,
+            api_instance_url=geo_url,
+            token_type="Bearer",
+            issued_at="0",
+            scope="sfap_api",
+            signature=None,
+            raw={},
+        )
+        with patch("salesforce_py.models.client.fetch_token", new=AsyncMock(return_value=token_resp)):
+            client = await ModelsClient.from_env()
+        assert client._session._base_url.startswith(geo_url)
+        await client.close()
+
+    async def test_from_env_raises_without_client_id(self, monkeypatch):
+        monkeypatch.delenv("SF_MODELS_CLIENT_ID", raising=False)
+        monkeypatch.delenv("SF_MODELS_CLIENT_SECRET", raising=False)
+        with pytest.raises(SalesforcePyError, match="SF_MODELS_CLIENT_ID"):
+            await ModelsClient.from_env()
+
+    async def test_from_env_raises_missing_instance_url(self, monkeypatch):
+        monkeypatch.setenv("SF_MODELS_CLIENT_ID", "kid")
+        monkeypatch.setenv("SF_MODELS_CLIENT_SECRET", "ksecret")
+        monkeypatch.delenv("SF_MODELS_INSTANCE_URL", raising=False)
+        monkeypatch.delenv("SF_INSTANCE_URL", raising=False)
+        with pytest.raises(SalesforcePyError, match="instance URL"):
+            await ModelsClient.from_env()
+
+    async def test_from_org_mints_token(self):
+        org = MagicMock()
+        org.instance_url = MY_DOMAIN
+
+        token_resp = TokenResponse(
+            access_token=ACCESS_TOKEN,
+            instance_url=MY_DOMAIN,
+            api_instance_url=None,
+            token_type="Bearer",
+            issued_at="0",
+            scope="sfap_api",
+            signature=None,
+            raw={},
+        )
+        with patch("salesforce_py.models.client.fetch_token", new=AsyncMock(return_value=token_resp)):
+            client = await ModelsClient.from_org(org, CONSUMER_KEY, CONSUMER_SECRET)
+        assert client._session._access_token == ACCESS_TOKEN
+        await client.close()

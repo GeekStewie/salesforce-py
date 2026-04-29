@@ -706,7 +706,7 @@ class SFOrgOperations(SFBaseOperations):
         )
         if isinstance(result, list):
             return result
-        return result.get("result", [])
+        return result.get("metadataObjects", result.get("result", []))
 
     def list_metadata_types(
         self,
@@ -726,7 +726,7 @@ class SFOrgOperations(SFBaseOperations):
         result = self._run_capturing(args, label="Listing metadata types")
         if isinstance(result, list):
             return result
-        return result.get("result", [])
+        return result.get("metadataObjects", result.get("result", []))
 
     def list_shape(self) -> list[dict[str, Any]]:
         """List all org shapes you've created.

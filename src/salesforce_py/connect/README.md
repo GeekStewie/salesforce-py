@@ -33,23 +33,60 @@ pip install "salesforce-py[all]"
 
 ## Getting an access token
 
-`ConnectClient` is token-driven — it does **not** perform OAuth on your behalf. You supply an `instance_url` and `access_token` from whatever auth flow you prefer. The quickest path during development is to reuse the session that the `sf` CLI already holds:
+Three factory methods cover the common authentication scenarios.
+
+### `from_env` — environment variables (recommended for CI/CD)
+
+Set environment variables and call `from_env()`. Credentials are resolved in this order:
+
+1. **Client credentials** — if `SF_CONNECT_CLIENT_ID` and `SF_CONNECT_CLIENT_SECRET` are both set, a `client_credentials` OAuth token is minted automatically. The My Domain URL is read from `SF_CONNECT_INSTANCE_URL`, with `SF_INSTANCE_URL` as a fallback.
+2. **SF CLI session** — if `target_org` is passed and env creds are absent, credentials are read from the SF CLI auth store.
+3. Raises `SalesforcePyError` if neither path succeeds.
+
+```bash
+export SF_CONNECT_CLIENT_ID="<consumer-key>"
+export SF_CONNECT_CLIENT_SECRET="<consumer-secret>"
+export SF_CONNECT_INSTANCE_URL="https://myorg.my.salesforce.com"
+```
+
+```python
+from salesforce_py.connect import ConnectClient
+
+async with await ConnectClient.from_env() as client:
+    me = await client.users.get_user("me")
+```
+
+Or fall back to the SF CLI (no env creds needed):
+
+```python
+async with await ConnectClient.from_env("my-org-alias") as client:
+    me = await client.users.get_user("me")
+```
+
+### `from_org` — SF CLI session
+
+Pass an `SFOrg` directly to reuse the CLI session token without env vars:
 
 ```python
 from salesforce_py.sf import SFOrgTask
 from salesforce_py.connect import ConnectClient
 
 task = SFOrgTask("my-org-alias")
-task.org._ensure_connected()  # populates instance_url + access_token
-
-async with ConnectClient(
-    instance_url=task.org.instance_url,
-    access_token=task.org.access_token,
-) as client:
+async with ConnectClient.from_org(task._org) as client:
     me = await client.users.get_user("me")
 ```
 
-In production use a JWT, refresh token, or client-credentials flow and pass the resulting token into `ConnectClient`.
+### Direct construction
+
+Supply credentials explicitly — useful when you already hold a token from your own OAuth flow:
+
+```python
+async with ConnectClient(
+    instance_url="https://myorg.my.salesforce.com",
+    access_token="<bearer-token>",
+) as client:
+    me = await client.users.get_user("me")
+```
 
 ## Client lifecycle
 

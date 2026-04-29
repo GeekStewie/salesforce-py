@@ -147,20 +147,28 @@ import asyncio
 from salesforce_py.connect import ConnectClient
 
 async def main():
-    async with ConnectClient(
-        instance_url="https://myorg.my.salesforce.com",
-        access_token="<bearer-token>",
-    ) as client:
+    # From environment variables (recommended for CI/CD):
+    async with await ConnectClient.from_env() as client:
         me = await client.users.get_user("me")
-        print(me["displayName"])
 
-        await client.chatter.post_feed_item(
-            body="Deployment shipped cleanly.",
-            subject_id="me",
-        )
+    # From SF CLI session:
+    async with await ConnectClient.from_env("my-org-alias") as client:
+        await client.chatter.post_feed_item(body="Shipped.", subject_id="me")
+
+    # Direct token:
+    async with ConnectClient(instance_url="...", access_token="...") as client:
+        ...
 
 asyncio.run(main())
 ```
+
+**Environment variables:**
+
+| Variable | Purpose |
+|---|---|
+| `SF_CONNECT_CLIENT_ID` | External Client App consumer key |
+| `SF_CONNECT_CLIENT_SECRET` | External Client App consumer secret |
+| `SF_CONNECT_INSTANCE_URL` | My Domain URL (falls back to `SF_INSTANCE_URL`) |
 
 Install with the `connect` extra (pulls in `httpx[http2]`):
 
@@ -168,7 +176,7 @@ Install with the `connect` extra (pulls in `httpx[http2]`):
 pip install "salesforce-py[connect]"
 ```
 
-See [src/salesforce_py/connect/README.md](src/salesforce_py/connect/README.md) for the full Connect API reference — the complete list of operation namespaces, authentication patterns, more examples, error handling, ID normalisation, HTTP/2 configuration, and testing guidance.
+See [src/salesforce_py/connect/README.md](src/salesforce_py/connect/README.md) for the full Connect API reference — operation namespaces, authentication patterns, error handling, ID normalisation, HTTP/2 configuration, and testing guidance.
 
 ## Data 360 REST API
 
@@ -179,21 +187,31 @@ import asyncio
 from salesforce_py.data360 import Data360Client
 
 async def main():
-    async with Data360Client(
-        instance_url="https://myorg.my.salesforce.com",
-        access_token="<bearer-token>",
-    ) as client:
-        # Run a SQL query
+    # From environment variables (recommended for CI/CD):
+    async with await Data360Client.from_env() as client:
+        segments = await client.segments.get_segments()
+
+    # From SF CLI session:
+    async with await Data360Client.from_env("my-org-alias") as client:
         submitted = await client.query.submit_sql_query(
             {"sql": "SELECT Id__c, Email__c FROM UnifiedIndividual__dlm LIMIT 10"},
             dataspace="default",
         )
 
-        # List segments
-        segments = await client.segments.get_segments()
+    # Direct token:
+    async with Data360Client(instance_url="...", access_token="...") as client:
+        ...
 
 asyncio.run(main())
 ```
+
+**Environment variables:**
+
+| Variable | Purpose |
+|---|---|
+| `SF_DATA360_CLIENT_ID` | External Client App consumer key |
+| `SF_DATA360_CLIENT_SECRET` | External Client App consumer secret |
+| `SF_DATA360_INSTANCE_URL` | My Domain URL (falls back to `SF_INSTANCE_URL`) |
 
 Install with the `data360` extra (pulls in `httpx[http2]`):
 
@@ -238,41 +256,42 @@ See [src/salesforce_py/data360/README.md](src/salesforce_py/data360/README.md) f
 
 `salesforce_py.models` is a fully async client for the Salesforce Einstein Models REST API at `https://api.salesforce.com/einstein/platform/v1/`. It covers chat generation, text generation, embeddings, and feedback. HTTP/2 is negotiated by default.
 
-The Models API uses a client-credentials OAuth flow — use `fetch_token` to mint a JWT from your External Client App credentials:
+The Models API uses a client-credentials OAuth flow. Client credentials are always required — standard SF CLI session tokens do not carry the `sfap_api`/`einstein_gpt_api` scopes.
 
 ```python
 import asyncio
-from salesforce_py.models import fetch_token, ModelsClient
+from salesforce_py.models import ModelsClient
 from salesforce_py.models.supported_models import BEDROCK_ANTHROPIC_CLAUDE_46_SONNET
 
 async def main():
-    token = await fetch_token(
-        my_domain="https://mycompany.my.salesforce.com",
-        consumer_key="<CONSUMER_KEY>",
-        consumer_secret="<CONSUMER_SECRET>",
-    )
-
-    async with ModelsClient(
-        token.access_token,
-        base_url=f"{token.api_instance_url}/einstein/platform/v1/" if token.api_instance_url else None,
-    ) as client:
-        # Chat generation
+    # From environment variables (recommended for CI/CD):
+    async with await ModelsClient.from_env() as client:
         reply = await client.chat_generations.generate(
             BEDROCK_ANTHROPIC_CLAUDE_46_SONNET,
-            messages=[
-                {"role": "system", "content": "You are a helpful Salesforce expert."},
-                {"role": "user", "content": "What is a DMO?"},
-            ],
+            messages=[{"role": "user", "content": "What is a DMO?"}],
         )
 
-        # Embeddings
+    # Resolve domain from SF CLI, supply client creds:
+    from salesforce_py.sf import SFOrgTask
+    task = SFOrgTask("my-org-alias")
+    async with await ModelsClient.from_org(
+        task._org, consumer_key="<KEY>", consumer_secret="<SECRET>",
+    ) as client:
         vectors = await client.embeddings.embed(
             "sfdc_ai__DefaultOpenAITextEmbeddingAda_002",
-            ["customer loyalty program", "referral rewards"],
+            ["customer loyalty program"],
         )
 
 asyncio.run(main())
 ```
+
+**Environment variables:**
+
+| Variable | Purpose |
+|---|---|
+| `SF_MODELS_CLIENT_ID` | External Client App consumer key (`sfap_api einstein_gpt_api api` scopes) |
+| `SF_MODELS_CLIENT_SECRET` | External Client App consumer secret |
+| `SF_MODELS_INSTANCE_URL` | My Domain URL (falls back to `SF_INSTANCE_URL`) |
 
 Install with the `models` extra (pulls in `httpx[http2]`):
 

@@ -2,6 +2,7 @@
 
 import json
 import logging
+import shlex
 import subprocess
 from pathlib import Path
 from typing import Any
@@ -141,7 +142,7 @@ class SFBaseOperations:
             include_api_version=include_api_version,
             include_json=include_json,
         )
-        cmd_str = " ".join(cmd)
+        cmd_str = " ".join(shlex.quote(part) for part in cmd)
         env = self._org.env()
 
         def _invoke() -> subprocess.CompletedProcess[str]:

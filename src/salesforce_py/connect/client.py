@@ -2,8 +2,15 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+from salesforce_py._auth import fetch_org_token, resolve_client_creds, resolve_instance_url
 from salesforce_py._retry import DEFAULT_TIMEOUT
 from salesforce_py.connect._session import _DEFAULT_API_VERSION, ConnectSession
+from salesforce_py.exceptions import SalesforcePyError
+
+if TYPE_CHECKING:
+    from salesforce_py.sf.org import SFOrg
 from salesforce_py.connect.operations.action_links import ActionLinksOperations
 from salesforce_py.connect.operations.activity_reminders import (
     ActivityRemindersOperations,
@@ -280,6 +287,131 @@ class ConnectClient:
         self.topics_on_records = TopicsOnRecordsOperations(self._session)
         self.user_profiles = UserProfilesOperations(self._session)
         self.users = UsersOperations(self._session)
+
+    # ------------------------------------------------------------------
+    # Alternate constructors
+    # ------------------------------------------------------------------
+
+    @classmethod
+    def from_org(
+        cls,
+        org: SFOrg,
+        api_version: str = _DEFAULT_API_VERSION,
+        timeout: float = DEFAULT_TIMEOUT,
+        http2: bool = True,
+    ) -> ConnectClient:
+        """Create a :class:`ConnectClient` from an already-connected :class:`~salesforce_py.sf.org.SFOrg`.
+
+        Calls :meth:`~salesforce_py.sf.org.SFOrg._ensure_connected` to
+        trigger lazy auth resolution, then forwards ``instance_url`` and
+        ``access_token`` directly.
+
+        Args:
+            org: An :class:`~salesforce_py.sf.org.SFOrg` instance (from
+                :class:`~salesforce_py.sf.SFOrgTask` or standalone).
+            api_version: Salesforce API version string.
+            timeout: Default HTTP request timeout in seconds.
+            http2: Negotiate HTTP/2 when the server supports it.
+
+        Returns:
+            A new :class:`ConnectClient` bound to the org's credentials.
+
+        Example::
+
+            from salesforce_py.sf import SFOrgTask
+            from salesforce_py.connect import ConnectClient
+
+            task = SFOrgTask("my-org-alias")
+            async with ConnectClient.from_org(task._org) as client:
+                feed = await client.chatter.get_feed_items()
+        """
+        org._ensure_connected()
+        return cls(
+            instance_url=org.instance_url,
+            access_token=org.access_token,
+            api_version=api_version,
+            timeout=timeout,
+            http2=http2,
+        )
+
+    @classmethod
+    async def from_env(
+        cls,
+        target_org: str | None = None,
+        api_version: str = _DEFAULT_API_VERSION,
+        timeout: float = DEFAULT_TIMEOUT,
+        http2: bool = True,
+    ) -> ConnectClient:
+        """Create a :class:`ConnectClient` from environment variables or an SF CLI org.
+
+        Resolution order:
+
+        1. **Client credentials** — if ``SF_CONNECT_CLIENT_ID`` and
+           ``SF_CONNECT_CLIENT_SECRET`` are both set, a ``client_credentials``
+           OAuth token is minted. The My Domain URL is read from
+           ``SF_CONNECT_INSTANCE_URL``, falling back to ``SF_INSTANCE_URL``.
+        2. **SF CLI session** — if ``target_org`` is provided (and env creds
+           are absent), credentials are read from the SF CLI auth store.
+        3. Raises :class:`~salesforce_py.exceptions.SalesforcePyError` if
+           neither path succeeds.
+
+        Args:
+            target_org: SF CLI alias or username. Used when env creds are absent.
+            api_version: Salesforce API version string.
+            timeout: Default HTTP request timeout in seconds.
+            http2: Negotiate HTTP/2 when the server supports it.
+
+        Returns:
+            A new :class:`ConnectClient` ready for use.
+
+        Raises:
+            SalesforcePyError: If credentials cannot be resolved.
+            AuthError: If the OAuth token request fails.
+
+        Example::
+
+            import asyncio
+            from salesforce_py.connect import ConnectClient
+
+            # With env vars SF_CONNECT_CLIENT_ID / SF_CONNECT_CLIENT_SECRET / SF_CONNECT_INSTANCE_URL:
+            async def main():
+                async with await ConnectClient.from_env() as client:
+                    feed = await client.chatter.get_feed_items()
+
+            # Or fall back to SF CLI:
+            async def main():
+                async with await ConnectClient.from_env("my-org-alias") as client:
+                    feed = await client.chatter.get_feed_items()
+        """
+        creds = resolve_client_creds("CONNECT")
+        if creds:
+            instance_url = resolve_instance_url("CONNECT")
+            if not instance_url:
+                raise SalesforcePyError(
+                    "SF_CONNECT_CLIENT_ID and SF_CONNECT_CLIENT_SECRET are set but no "
+                    "instance URL was found. Set SF_CONNECT_INSTANCE_URL or SF_INSTANCE_URL."
+                )
+            access_token, resolved_url = await fetch_org_token(
+                instance_url, creds[0], creds[1], timeout=timeout
+            )
+            return cls(
+                instance_url=resolved_url,
+                access_token=access_token,
+                api_version=api_version,
+                timeout=timeout,
+                http2=http2,
+            )
+
+        if target_org is not None:
+            from salesforce_py.sf.org import SFOrg
+            org = SFOrg(target_org=target_org)
+            return cls.from_org(org, api_version=api_version, timeout=timeout, http2=http2)
+
+        raise SalesforcePyError(
+            "Cannot resolve ConnectClient credentials. Either set "
+            "SF_CONNECT_CLIENT_ID + SF_CONNECT_CLIENT_SECRET + SF_CONNECT_INSTANCE_URL, "
+            "or pass a target_org alias to from_env()."
+        )
 
     # ------------------------------------------------------------------
     # Async context manager
