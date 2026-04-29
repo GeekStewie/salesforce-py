@@ -85,8 +85,7 @@ class TestOrgDisplay:
         auths = task.org.list_auth()
         assert isinstance(auths, list)
         assert any(
-            a.get("alias") == TARGET_ORG or a.get("username") == task._org.username
-            for a in auths
+            a.get("alias") == TARGET_ORG or a.get("username") == task._org.username for a in auths
         )
 
     def test_list_users(self, task):

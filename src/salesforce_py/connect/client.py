@@ -404,6 +404,7 @@ class ConnectClient:
 
         if target_org is not None:
             from salesforce_py.sf.org import SFOrg
+
             org = SFOrg(target_org=target_org)
             return cls.from_org(org, api_version=api_version, timeout=timeout, http2=http2)
 
