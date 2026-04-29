@@ -6,7 +6,7 @@
 
 > **Disclaimer:** This is an independent, community-maintained project and is **not affiliated with, endorsed by, or supported by Salesforce, Inc.** Salesforce, the Salesforce CLI, and related marks are trademarks of Salesforce, Inc.
 
-A Python wrapper for Salesforce CLIs and APIs. Currently provides a comprehensive sync wrapper for the [Salesforce CLI (`sf`)](https://developer.salesforce.com/tools/salesforcecli), with REST and Bulk API support planned.
+A Python wrapper for Salesforce CLIs and APIs. Provides a comprehensive sync wrapper for the [Salesforce CLI (`sf`)](https://developer.salesforce.com/tools/salesforcecli) plus a fully async client for the [Salesforce Connect REST API](https://developer.salesforce.com/docs/atlas.en-us.chatterapi.meta/chatterapi/intro_what_is_chatter_connect.htm) (Chatter, Files, Communities, Commerce, Einstein, and more). REST and Bulk API clients are on the roadmap.
 
 ## Requirements
 
@@ -24,10 +24,13 @@ pip install salesforce-py
 With optional extras:
 
 ```bash
-# REST API support
+# Connect REST API (Chatter, Files, Communities, Commerce, Einstein, etc.)
+pip install "salesforce-py[connect]"
+
+# REST API support (planned)
 pip install "salesforce-py[rest]"
 
-# Bulk API support
+# Bulk API support (planned)
 pip install "salesforce-py[bulk]"
 
 # Salesforce Code Analyzer plugin support
@@ -115,6 +118,38 @@ task.agent.test_run(api_name="MyAgentTest", wait=5)
 | `task.sobject` | sObject CRUD helpers |
 | `task.template` | Project template generation |
 | `task.ui_bundle` | UI Bundle deployment |
+
+## Connect REST API
+
+`salesforce_py.connect` is a fully async client for the Salesforce Connect REST API. It covers Chatter, Files, Communities, Commerce, Einstein, Managed Topics, Named Credentials, Search, and most other endpoints served under `/services/data/vXX.X/connect/` (and sibling namespaces). HTTP/2 is negotiated by default, with transparent fallback to HTTP/1.1.
+
+```python
+import asyncio
+from salesforce_py.connect import ConnectClient
+
+async def main():
+    async with ConnectClient(
+        instance_url="https://myorg.my.salesforce.com",
+        access_token="<bearer-token>",
+    ) as client:
+        me = await client.users.get_user("me")
+        print(me["displayName"])
+
+        await client.chatter.post_feed_item(
+            body="Deployment shipped cleanly.",
+            subject_id="me",
+        )
+
+asyncio.run(main())
+```
+
+Install with the `connect` extra (pulls in `httpx[http2]`):
+
+```bash
+pip install "salesforce-py[connect]"
+```
+
+See [tests/connect/README.md](src/salesforce_py/connect/README.md) for the full Connect API reference — the complete list of operation namespaces, authentication patterns, more examples, error handling, ID normalisation, HTTP/2 configuration, and testing guidance.
 
 ## SF CLI setup helper
 

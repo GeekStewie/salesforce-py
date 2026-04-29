@@ -6,13 +6,14 @@ import subprocess
 from pathlib import Path
 from typing import Any
 
+from salesforce_py._defaults import DEFAULT_API_VERSION
 from salesforce_py.sf.org import SFOrg
 from salesforce_py.exceptions import CLIError, SalesforcePyError
 
 _log = logging.getLogger(__name__)
 
 
-def _resolve_api_version() -> str | None:
+def _resolve_api_version() -> str:
     """Read the sourceApiVersion from sfdx-project.json in the working directory tree.
 
     Walks up from the current directory to find sfdx-project.json.
@@ -32,7 +33,7 @@ def _resolve_api_version() -> str | None:
             except (json.JSONDecodeError, OSError):
                 pass
             break  # Found file but couldn't read — don't keep searching
-    return None
+    return DEFAULT_API_VERSION
 
 
 class SFBaseOperations:
