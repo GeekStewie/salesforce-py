@@ -10,12 +10,14 @@ from tests.bulk.conftest import make_client, make_response
 
 class TestCreateJob:
     async def test_insert_posts_expected_payload(self):
-        body = {"id": "750xx", "state": "Open", "contentUrl": "services/data/v66.0/jobs/ingest/750xx/batches"}
+        body = {
+            "id": "750xx",
+            "state": "Open",
+            "contentUrl": "services/data/v66.0/jobs/ingest/750xx/batches",
+        }
         client = await make_client(mock_post=make_response(200, json_body=body))
 
-        result = await client.ingest.create_job(
-            object_name="Account", operation="insert"
-        )
+        result = await client.ingest.create_job(object_name="Account", operation="insert")
 
         assert result == body
         client._session.post.assert_awaited_once()
@@ -87,9 +89,7 @@ class TestUploadData:
         client = await make_client(mock_put=make_response(201))
 
         with pytest.raises(ValueError, match="raw ceiling"):
-            await client.ingest.upload_data(
-                "750xx", csv_data=b"x" * (MAX_UPLOAD_BYTES_RAW + 1)
-            )
+            await client.ingest.upload_data("750xx", csv_data=b"x" * (MAX_UPLOAD_BYTES_RAW + 1))
         client._session.put.assert_not_awaited()
         await client.close()
 
@@ -110,9 +110,7 @@ class TestUploadComplete:
 
 class TestAbortAndDelete:
     async def test_abort_sends_aborted_state(self):
-        client = await make_client(
-            mock_patch=make_response(200, json_body={"state": "Aborted"})
-        )
+        client = await make_client(mock_patch=make_response(200, json_body={"state": "Aborted"}))
         await client.ingest.abort_job("750xx")
         assert client._session.patch.await_args.kwargs["json"] == {"state": "Aborted"}
         await client.close()

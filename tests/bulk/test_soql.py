@@ -59,8 +59,7 @@ class TestPrepareQuery:
 
     def test_handles_function_with_commas_in_order_key(self):
         prepared = prepare_query(
-            "SELECT Id FROM Account "
-            "ORDER BY DISTANCE(Location__c, GEOLOCATION(37.7, -122.4), 'mi')"
+            "SELECT Id FROM Account ORDER BY DISTANCE(Location__c, GEOLOCATION(37.7, -122.4), 'mi')"
         )
         assert prepared.soql == "SELECT Id FROM Account"
         # Single sort key even though the function has inner commas.

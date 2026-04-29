@@ -1,5 +1,8 @@
 [environment]
 python-version = "3.12"
 
+[src]
+exclude = ["tests"]
+
 [rules]
 unresolved-import = "ignore"

@@ -151,9 +151,7 @@ class TestRunQuery:
         async def fake_get_all_results(self, job_id, **kwargs):
             return b"Id\n001\n"
 
-        monkeypatch.setattr(
-            query_mod.QueryOperations, "get_all_results", fake_get_all_results
-        )
+        monkeypatch.setattr(query_mod.QueryOperations, "get_all_results", fake_get_all_results)
 
         result = await client.query.run_query("SELECT Id FROM Account")
 
@@ -170,9 +168,7 @@ class TestRunQuery:
 
         client = await make_client(
             mock_post=make_response(200, json_body={"id": "750yy"}),
-            mock_get=make_response(
-                200, json_body={"state": "Failed", "errorMessage": "boom"}
-            ),
+            mock_get=make_response(200, json_body={"state": "Failed", "errorMessage": "boom"}),
         )
 
         with pytest.raises(SalesforcePyError, match="Failed"):

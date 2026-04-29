@@ -24,9 +24,7 @@ class TestConstants:
 
 
 class TestValidators:
-    @pytest.mark.parametrize(
-        "op", ["insert", "update", "upsert", "delete", "hardDelete"]
-    )
+    @pytest.mark.parametrize("op", ["insert", "update", "upsert", "delete", "hardDelete"])
     def test_valid_ingest_ops(self, op):
         assert validate_operation(op) == op
 
@@ -42,9 +40,7 @@ class TestValidators:
         with pytest.raises(ValueError, match="Invalid query operation"):
             validate_query_operation("insert")
 
-    @pytest.mark.parametrize(
-        "delim", ["BACKQUOTE", "CARET", "COMMA", "PIPE", "SEMICOLON", "TAB"]
-    )
+    @pytest.mark.parametrize("delim", ["BACKQUOTE", "CARET", "COMMA", "PIPE", "SEMICOLON", "TAB"])
     def test_valid_column_delimiter(self, delim):
         assert validate_column_delimiter(delim) == delim
 

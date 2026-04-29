@@ -50,6 +50,24 @@ path = "src/salesforce_py/_version.py"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/salesforce_py"]
+include = [
+    "src/salesforce_py/**/*.py",
+    "src/salesforce_py/**/*.json",
+    "src/salesforce_py/**/*.md",
+]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "src/**/*.py",
+    "src/**/*.json",
+    "src/**/*.md",
+    "tests/**/*.py",
+    "tests/**/*.json",
+    "README.md",
+    "LICENSE",
+    "pyproject.toml",
+    "ty.toml",
+]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
@@ -63,6 +81,7 @@ markers = [
 line-length = 100
 target-version = "py312"
 src = ["src"]
+extend-exclude = ["tests"]
 
 [tool.ruff.lint]
 select = ["E", "W", "F", "I", "UP", "B", "SIM"]
