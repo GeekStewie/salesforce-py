@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 import httpx
 
 from salesforce_py._defaults import DEFAULT_API_VERSION as _DEFAULT_API_VERSION
+from salesforce_py._retry import DEFAULT_TIMEOUT
 
 
 class Data360Session:
@@ -29,7 +32,7 @@ class Data360Session:
         instance_url: str,
         access_token: str,
         api_version: str = _DEFAULT_API_VERSION,
-        timeout: float = 30.0,
+        timeout: float = DEFAULT_TIMEOUT,
         http2: bool = True,
     ) -> None:
         self._instance_url = instance_url.rstrip("/")
@@ -85,17 +88,17 @@ class Data360Session:
             )
         return self._client
 
-    async def get(self, path: str, **kwargs: object) -> httpx.Response:
+    async def get(self, path: str, **kwargs: Any) -> httpx.Response:
         return await self._client_or_raise().get(path, **kwargs)
 
-    async def post(self, path: str, **kwargs: object) -> httpx.Response:
+    async def post(self, path: str, **kwargs: Any) -> httpx.Response:
         return await self._client_or_raise().post(path, **kwargs)
 
-    async def patch(self, path: str, **kwargs: object) -> httpx.Response:
+    async def patch(self, path: str, **kwargs: Any) -> httpx.Response:
         return await self._client_or_raise().patch(path, **kwargs)
 
-    async def put(self, path: str, **kwargs: object) -> httpx.Response:
+    async def put(self, path: str, **kwargs: Any) -> httpx.Response:
         return await self._client_or_raise().put(path, **kwargs)
 
-    async def delete(self, path: str, **kwargs: object) -> httpx.Response:
+    async def delete(self, path: str, **kwargs: Any) -> httpx.Response:
         return await self._client_or_raise().delete(path, **kwargs)

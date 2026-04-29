@@ -172,9 +172,7 @@ class AgentforceDataLibrariesOperations(ConnectBaseOperations):
             ``uploadUrl``, ``filePath``, and ``headers``.
         """
         payload = {"files": [{"fileName": fn} for fn in file_names]}
-        return await self._post(
-            f"{self._lib_path(library_id)}/file-upload-urls", json=payload
-        )
+        return await self._post(f"{self._lib_path(library_id)}/file-upload-urls", json=payload)
 
     # ------------------------------------------------------------------
     # Add files  /einstein/data-libraries/{libraryId}/files
@@ -200,9 +198,7 @@ class AgentforceDataLibrariesOperations(ConnectBaseOperations):
             ``filesAccepted``, and ``groundingFileRefs`` keys.
         """
         payload = {"uploadedFiles": uploaded_files}
-        return await self._post(
-            f"{self._lib_path(library_id)}/files", json=payload
-        )
+        return await self._post(f"{self._lib_path(library_id)}/files", json=payload)
 
     # ------------------------------------------------------------------
     # Indexing  /einstein/data-libraries/{libraryId}/indexing
@@ -233,9 +229,7 @@ class AgentforceDataLibrariesOperations(ConnectBaseOperations):
         payload: dict[str, Any] = {}
         if uploaded_files is not None:
             payload["uploadedFiles"] = uploaded_files
-        return await self._post(
-            f"{self._lib_path(library_id)}/indexing", json=payload
-        )
+        return await self._post(f"{self._lib_path(library_id)}/indexing", json=payload)
 
     # ------------------------------------------------------------------
     # Status  /einstein/data-libraries/{libraryId}/status
@@ -286,6 +280,4 @@ class AgentforceDataLibrariesOperations(ConnectBaseOperations):
         params: dict[str, Any] = {}
         if wait_max_time is not None:
             params["waitMaxTime"] = wait_max_time
-        return await self._get(
-            f"{self._lib_path(library_id)}/upload-readiness", params=params
-        )
+        return await self._get(f"{self._lib_path(library_id)}/upload-readiness", params=params)

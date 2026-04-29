@@ -8,6 +8,7 @@ from typing import Any
 
 import httpx
 
+from salesforce_py._retry import retry_async_http_call
 from salesforce_py.data360._session import Data360Session
 from salesforce_py.exceptions import AuthError, SalesforcePyError
 
@@ -51,7 +52,9 @@ class Data360BaseOperations:
         params: dict[str, Any] | None = None,
         headers: dict[str, str] | None = None,
     ) -> dict[str, Any]:
-        response = await self._session.get(path, params=_drop_none(params), headers=headers)
+        response = await retry_async_http_call(
+            lambda: self._session.get(path, params=_drop_none(params), headers=headers)
+        )
         return self._handle(response)
 
     async def _get_bytes(
@@ -61,7 +64,9 @@ class Data360BaseOperations:
         params: dict[str, Any] | None = None,
         headers: dict[str, str] | None = None,
     ) -> bytes:
-        response = await self._session.get(path, params=_drop_none(params), headers=headers)
+        response = await retry_async_http_call(
+            lambda: self._session.get(path, params=_drop_none(params), headers=headers)
+        )
         self._handle_status(response)
         return response.content
 
@@ -76,7 +81,7 @@ class Data360BaseOperations:
         kwargs: dict[str, Any] = {"params": _drop_none(params), "headers": headers}
         if json is not None:
             kwargs["json"] = json
-        response = await self._session.post(path, **kwargs)
+        response = await retry_async_http_call(lambda: self._session.post(path, **kwargs))
         return self._handle(response)
 
     async def _patch(
@@ -90,7 +95,7 @@ class Data360BaseOperations:
         kwargs: dict[str, Any] = {"params": _drop_none(params), "headers": headers}
         if json is not None:
             kwargs["json"] = json
-        response = await self._session.patch(path, **kwargs)
+        response = await retry_async_http_call(lambda: self._session.patch(path, **kwargs))
         return self._handle(response)
 
     async def _put(
@@ -104,7 +109,7 @@ class Data360BaseOperations:
         kwargs: dict[str, Any] = {"params": _drop_none(params), "headers": headers}
         if json is not None:
             kwargs["json"] = json
-        response = await self._session.put(path, **kwargs)
+        response = await retry_async_http_call(lambda: self._session.put(path, **kwargs))
         return self._handle(response)
 
     async def _delete(
@@ -114,7 +119,9 @@ class Data360BaseOperations:
         params: dict[str, Any] | None = None,
         headers: dict[str, str] | None = None,
     ) -> dict[str, Any]:
-        response = await self._session.delete(path, params=_drop_none(params), headers=headers)
+        response = await retry_async_http_call(
+            lambda: self._session.delete(path, params=_drop_none(params), headers=headers)
+        )
         return self._handle(response)
 
     # ------------------------------------------------------------------

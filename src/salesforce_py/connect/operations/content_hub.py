@@ -65,9 +65,7 @@ class FilesConnectRepositoryOperations(ConnectBaseOperations):
             params["page"] = page
         if page_size is not None:
             params["pageSize"] = page_size
-        return await self._get(
-            f"{self._prefix(community_id)}/repositories", params=params
-        )
+        return await self._get(f"{self._prefix(community_id)}/repositories", params=params)
 
     async def get_repository(
         self, repository_id: str, *, community_id: str | None = None
@@ -81,9 +79,7 @@ class FilesConnectRepositoryOperations(ConnectBaseOperations):
         Returns:
             Files Connect Repository dict.
         """
-        return await self._get(
-            f"{self._prefix(community_id)}/repositories/{repository_id}"
-        )
+        return await self._get(f"{self._prefix(community_id)}/repositories/{repository_id}")
 
     async def get_repository_directory_entries(
         self, repository_id: str, *, community_id: str | None = None
@@ -127,12 +123,9 @@ class FilesConnectRepositoryOperations(ConnectBaseOperations):
         """
         params: dict[str, Any] = {}
         if include_external_file_permissions_info is not None:
-            params["includeExternalFilePermissionsInfo"] = (
-                include_external_file_permissions_info
-            )
+            params["includeExternalFilePermissionsInfo"] = include_external_file_permissions_info
         return await self._get(
-            f"{self._prefix(community_id)}/repositories/{repository_id}"
-            f"/files/{repository_file_id}",
+            f"{self._prefix(community_id)}/repositories/{repository_id}/files/{repository_file_id}",
             params=params,
         )
 
@@ -160,8 +153,7 @@ class FilesConnectRepositoryOperations(ConnectBaseOperations):
         """
         body = {"itemTypeId": item_type_id, "fields": fields}
         return await self._patch(
-            f"{self._prefix(community_id)}/repositories/{repository_id}"
-            f"/files/{repository_file_id}",
+            f"{self._prefix(community_id)}/repositories/{repository_id}/files/{repository_file_id}",
             json=body,
         )
 
@@ -438,9 +430,7 @@ class FilesConnectRepositoryOperations(ConnectBaseOperations):
             ValueError: If neither list is supplied.
         """
         if permissions_to_apply is None and permissions_to_remove is None:
-            raise ValueError(
-                "Provide permissions_to_apply and/or permissions_to_remove."
-            )
+            raise ValueError("Provide permissions_to_apply and/or permissions_to_remove.")
         body: dict[str, Any] = {}
         if permissions_to_apply is not None:
             body["permissionsToApply"] = permissions_to_apply

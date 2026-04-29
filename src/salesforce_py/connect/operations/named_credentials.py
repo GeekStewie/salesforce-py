@@ -65,9 +65,7 @@ class NamedCredentialsOperations(ConnectBaseOperations):
         params: dict[str, Any] = {}
         if action is not None:
             params["action"] = action
-        return await self._post(
-            "named-credentials/credential", json=body, params=params
-        )
+        return await self._post("named-credentials/credential", json=body, params=params)
 
     async def replace_credential(self, body: dict[str, Any]) -> dict[str, Any]:
         """Replace a credential (v56.0+).
@@ -120,12 +118,8 @@ class NamedCredentialsOperations(ConnectBaseOperations):
         if principal_name is not None:
             params["principalName"] = principal_name
         if authentication_parameters is not None:
-            params["authenticationParameters"] = ",".join(
-                authentication_parameters
-            )
-        return await self._delete(
-            "named-credentials/credential", params=params
-        )
+            params["authenticationParameters"] = ",".join(authentication_parameters)
+        return await self._delete("named-credentials/credential", params=params)
 
     async def get_oauth_url(self, body: dict[str, Any]) -> dict[str, Any]:
         """Get the URL for the OAuth token flow for an external credential.
@@ -138,9 +132,7 @@ class NamedCredentialsOperations(ConnectBaseOperations):
         Returns:
             OAuth Credential Auth URL dict.
         """
-        return await self._post(
-            "named-credentials/credential/auth-url/o-auth", json=body
-        )
+        return await self._post("named-credentials/credential/auth-url/o-auth", json=body)
 
     # ------------------------------------------------------------------
     # External credentials
@@ -154,9 +146,7 @@ class NamedCredentialsOperations(ConnectBaseOperations):
         """
         return await self._get("named-credentials/external-credentials")
 
-    async def create_external_credential(
-        self, body: dict[str, Any]
-    ) -> dict[str, Any]:
+    async def create_external_credential(self, body: dict[str, Any]) -> dict[str, Any]:
         """Create an external credential (v58.0+).
 
         Args:
@@ -165,13 +155,9 @@ class NamedCredentialsOperations(ConnectBaseOperations):
         Returns:
             External Credential dict.
         """
-        return await self._post(
-            "named-credentials/external-credentials", json=body
-        )
+        return await self._post("named-credentials/external-credentials", json=body)
 
-    async def get_external_credential(
-        self, developer_name: str
-    ) -> dict[str, Any]:
+    async def get_external_credential(self, developer_name: str) -> dict[str, Any]:
         """Get an external credential (v56.0+).
 
         Args:
@@ -180,9 +166,7 @@ class NamedCredentialsOperations(ConnectBaseOperations):
         Returns:
             External Credential dict.
         """
-        return await self._get(
-            f"named-credentials/external-credentials/{developer_name}"
-        )
+        return await self._get(f"named-credentials/external-credentials/{developer_name}")
 
     async def update_external_credential(
         self, developer_name: str, body: dict[str, Any]
@@ -201,9 +185,7 @@ class NamedCredentialsOperations(ConnectBaseOperations):
             json=body,
         )
 
-    async def delete_external_credential(
-        self, developer_name: str
-    ) -> dict[str, Any]:
+    async def delete_external_credential(self, developer_name: str) -> dict[str, Any]:
         """Delete an external credential (v58.0+).
 
         Args:
@@ -212,9 +194,7 @@ class NamedCredentialsOperations(ConnectBaseOperations):
         Returns:
             Empty dict on success.
         """
-        return await self._delete(
-            f"named-credentials/external-credentials/{developer_name}"
-        )
+        return await self._delete(f"named-credentials/external-credentials/{developer_name}")
 
     # ------------------------------------------------------------------
     # Named credentials
@@ -228,9 +208,7 @@ class NamedCredentialsOperations(ConnectBaseOperations):
         """
         return await self._get("named-credentials/named-credential-setup")
 
-    async def create_named_credential(
-        self, body: dict[str, Any]
-    ) -> dict[str, Any]:
+    async def create_named_credential(self, body: dict[str, Any]) -> dict[str, Any]:
         """Create a named credential (v58.0+).
 
         Args:
@@ -239,9 +217,7 @@ class NamedCredentialsOperations(ConnectBaseOperations):
         Returns:
             Named Credential dict.
         """
-        return await self._post(
-            "named-credentials/named-credential-setup", json=body
-        )
+        return await self._post("named-credentials/named-credential-setup", json=body)
 
     async def get_named_credential(self, developer_name: str) -> dict[str, Any]:
         """Get a named credential (v58.0+).
@@ -252,9 +228,7 @@ class NamedCredentialsOperations(ConnectBaseOperations):
         Returns:
             Named Credential dict.
         """
-        return await self._get(
-            f"named-credentials/named-credential-setup/{developer_name}"
-        )
+        return await self._get(f"named-credentials/named-credential-setup/{developer_name}")
 
     async def update_named_credential(
         self, developer_name: str, body: dict[str, Any]
@@ -273,9 +247,7 @@ class NamedCredentialsOperations(ConnectBaseOperations):
             json=body,
         )
 
-    async def delete_named_credential(
-        self, developer_name: str
-    ) -> dict[str, Any]:
+    async def delete_named_credential(self, developer_name: str) -> dict[str, Any]:
         """Delete a named credential (v58.0+).
 
         Args:
@@ -284,9 +256,7 @@ class NamedCredentialsOperations(ConnectBaseOperations):
         Returns:
             Empty dict on success.
         """
-        return await self._delete(
-            f"named-credentials/named-credential-setup/{developer_name}"
-        )
+        return await self._delete(f"named-credentials/named-credential-setup/{developer_name}")
 
     # ------------------------------------------------------------------
     # External auth identity providers
@@ -298,13 +268,9 @@ class NamedCredentialsOperations(ConnectBaseOperations):
         Returns:
             External Auth Identity Provider List dict.
         """
-        return await self._get(
-            "named-credentials/external-auth-identity-providers"
-        )
+        return await self._get("named-credentials/external-auth-identity-providers")
 
-    async def create_external_auth_identity_provider(
-        self, body: dict[str, Any]
-    ) -> dict[str, Any]:
+    async def create_external_auth_identity_provider(self, body: dict[str, Any]) -> dict[str, Any]:
         """Create an external auth identity provider (v62.0+).
 
         Args:
@@ -313,13 +279,9 @@ class NamedCredentialsOperations(ConnectBaseOperations):
         Returns:
             External Auth Identity Provider dict.
         """
-        return await self._post(
-            "named-credentials/external-auth-identity-providers", json=body
-        )
+        return await self._post("named-credentials/external-auth-identity-providers", json=body)
 
-    async def get_external_auth_identity_provider(
-        self, full_name: str
-    ) -> dict[str, Any]:
+    async def get_external_auth_identity_provider(self, full_name: str) -> dict[str, Any]:
         """Get an external auth identity provider (v62.0+).
 
         Args:
@@ -328,9 +290,7 @@ class NamedCredentialsOperations(ConnectBaseOperations):
         Returns:
             External Auth Identity Provider dict.
         """
-        return await self._get(
-            f"named-credentials/external-auth-identity-providers/{full_name}"
-        )
+        return await self._get(f"named-credentials/external-auth-identity-providers/{full_name}")
 
     async def update_external_auth_identity_provider(
         self, full_name: str, body: dict[str, Any]
@@ -349,9 +309,7 @@ class NamedCredentialsOperations(ConnectBaseOperations):
             json=body,
         )
 
-    async def delete_external_auth_identity_provider(
-        self, full_name: str
-    ) -> dict[str, Any]:
+    async def delete_external_auth_identity_provider(self, full_name: str) -> dict[str, Any]:
         """Delete an external auth identity provider (v62.0+).
 
         Args:
@@ -360,9 +318,7 @@ class NamedCredentialsOperations(ConnectBaseOperations):
         Returns:
             Empty dict on success.
         """
-        return await self._delete(
-            f"named-credentials/external-auth-identity-providers/{full_name}"
-        )
+        return await self._delete(f"named-credentials/external-auth-identity-providers/{full_name}")
 
     # ------------------------------------------------------------------
     # External auth identity provider credentials

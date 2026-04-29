@@ -85,11 +85,11 @@ class SFAliasOperations(SFBaseOperations):
             # aliases is guaranteed non-None here (validated above)
             args += aliases or []
 
-        label = (
-            "Unsetting all aliases"
-            if all_aliases
-            else f"Unsetting alias{'es' if len(aliases or []) > 1 else ''} {', '.join(aliases or [])}"
-        )
+        if all_aliases:
+            label = "Unsetting all aliases"
+        else:
+            plural = "es" if len(aliases or []) > 1 else ""
+            label = f"Unsetting alias{plural} {', '.join(aliases or [])}"
 
         return self._run_capturing(
             args,

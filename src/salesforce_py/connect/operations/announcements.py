@@ -46,9 +46,7 @@ class AnnouncementsOperations(ConnectBaseOperations):
         params: dict[str, Any] = {"parentId": parent_id, "pageSize": page_size}
         if page is not None:
             params["page"] = page
-        return await self._get(
-            f"{self._prefix(community_id)}chatter/announcements", params=params
-        )
+        return await self._get(f"{self._prefix(community_id)}chatter/announcements", params=params)
 
     async def create_announcement(
         self,
@@ -82,9 +80,7 @@ class AnnouncementsOperations(ConnectBaseOperations):
         }
         if send_emails is not None:
             payload["sendEmails"] = send_emails
-        return await self._post(
-            f"{self._prefix(community_id)}chatter/announcements", json=payload
-        )
+        return await self._post(f"{self._prefix(community_id)}chatter/announcements", json=payload)
 
     async def create_announcement_from_feed_item(
         self,
@@ -113,9 +109,7 @@ class AnnouncementsOperations(ConnectBaseOperations):
         }
         if send_emails is not None:
             payload["sendEmails"] = send_emails
-        return await self._post(
-            f"{self._prefix(community_id)}chatter/announcements", json=payload
-        )
+        return await self._post(f"{self._prefix(community_id)}chatter/announcements", json=payload)
 
     async def get_announcement(
         self,

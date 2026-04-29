@@ -94,9 +94,7 @@ class SearchOperations(ConnectBaseOperations):
             payload["pageSize"] = page_size
         if spellcheck is not None:
             payload["spellcheck"] = spellcheck
-        return await self._post(
-            f"search/sobjects/{object_api_name}/results", json=payload
-        )
+        return await self._post(f"search/sobjects/{object_api_name}/results", json=payload)
 
     # ------------------------------------------------------------------
     # Einstein answers (natural language)
@@ -138,6 +136,4 @@ class SearchOperations(ConnectBaseOperations):
         params: dict[str, Any] = {"q": q}
         if display_fields is not None:
             params["displayFields"] = ",".join(display_fields)
-        return await self._get(
-            f"search/sobjects/{object_api_name}/answer", params=params
-        )
+        return await self._get(f"search/sobjects/{object_api_name}/answer", params=params)

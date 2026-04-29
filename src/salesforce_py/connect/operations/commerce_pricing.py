@@ -36,42 +36,22 @@ class CommercePricingOperations(ConnectBaseOperations):
             params=params,
         )
 
-    async def get_product_prices(
-        self, webstore_id: str, body: dict[str, Any]
-    ) -> dict[str, Any]:
+    async def get_product_prices(self, webstore_id: str, body: dict[str, Any]) -> dict[str, Any]:
         """Get the prices for multiple products (POST)."""
-        return await self._post(
-            f"{self._base(webstore_id)}/pricing/products", json=body
-        )
+        return await self._post(f"{self._base(webstore_id)}/pricing/products", json=body)
 
-    async def evaluate_promotions(
-        self, body: dict[str, Any]
-    ) -> dict[str, Any]:
+    async def evaluate_promotions(self, body: dict[str, Any]) -> dict[str, Any]:
         """Determine which promotions the customer is eligible for."""
-        return await self._post(
-            "commerce/promotions/actions/evaluate", json=body
-        )
+        return await self._post("commerce/promotions/actions/evaluate", json=body)
 
-    async def evaluate_product_promotions(
-        self, body: dict[str, Any]
-    ) -> dict[str, Any]:
+    async def evaluate_product_promotions(self, body: dict[str, Any]) -> dict[str, Any]:
         """Determine which promotions apply to a product or set of products."""
-        return await self._post(
-            "commerce/promotions/actions/evaluate-products", json=body
-        )
+        return await self._post("commerce/promotions/actions/evaluate-products", json=body)
 
-    async def decrease_coupon_use(
-        self, body: dict[str, Any]
-    ) -> dict[str, Any]:
+    async def decrease_coupon_use(self, body: dict[str, Any]) -> dict[str, Any]:
         """Revert coupon code redemption usage."""
-        return await self._post(
-            "commerce/promotions/actions/decrease-use/coupon-codes", json=body
-        )
+        return await self._post("commerce/promotions/actions/decrease-use/coupon-codes", json=body)
 
-    async def increase_coupon_use(
-        self, body: dict[str, Any]
-    ) -> dict[str, Any]:
+    async def increase_coupon_use(self, body: dict[str, Any]) -> dict[str, Any]:
         """Increase coupon code redemption usage."""
-        return await self._post(
-            "commerce/promotions/actions/increase-use/coupon-codes", json=body
-        )
+        return await self._post("commerce/promotions/actions/increase-use/coupon-codes", json=body)

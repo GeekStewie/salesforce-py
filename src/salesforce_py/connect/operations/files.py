@@ -157,9 +157,7 @@ class FilesOperations(ConnectBaseOperations):
         file_id = self._ensure_18(file_id)
         return await self._get(f"files/{file_id}/previews")
 
-    async def generate_file_previews(
-        self, file_id: str, *, num_pages: int = 1
-    ) -> dict[str, Any]:
+    async def generate_file_previews(self, file_id: str, *, num_pages: int = 1) -> dict[str, Any]:
         """Request generation of up to 500 preview pages.
 
         Args:
@@ -189,9 +187,7 @@ class FilesOperations(ConnectBaseOperations):
         params: dict[str, Any] = {}
         if page_number is not None:
             params["pageNumber"] = page_number
-        return await self._get_bytes(
-            f"files/{file_id}/previews/{preview_format}", params=params
-        )
+        return await self._get_bytes(f"files/{file_id}/previews/{preview_format}", params=params)
 
     # ------------------------------------------------------------------
     # Image  /connect/files/<fileId>/image
@@ -240,9 +236,7 @@ class FilesOperations(ConnectBaseOperations):
         """
         file_id = self._ensure_18(file_id)
         user_ids = self._ensure_18_list(user_ids)
-        payload = {
-            "shares": [{"shareType": share_type, "sharedWithId": uid} for uid in user_ids]
-        }
+        payload = {"shares": [{"shareType": share_type, "sharedWithId": uid} for uid in user_ids]}
         return await self._post(f"files/{file_id}/file-shares", json=payload)
 
     # ------------------------------------------------------------------
@@ -396,9 +390,7 @@ class FilesOperations(ConnectBaseOperations):
     # Asset files  /connect/files/<fileId>/asset
     # ------------------------------------------------------------------
 
-    async def create_asset_file(
-        self, file_id: str, asset_data: dict[str, Any]
-    ) -> dict[str, Any]:
+    async def create_asset_file(self, file_id: str, asset_data: dict[str, Any]) -> dict[str, Any]:
         """Create an asset file from an existing file.
 
         Args:
@@ -544,9 +536,7 @@ class FilesOperations(ConnectBaseOperations):
         folder_id = self._ensure_18(folder_id)
         return await self._get(f"folders/{folder_id}/items")
 
-    async def add_file_to_folder(
-        self, folder_id: str, file_id: str
-    ) -> dict[str, Any]:
+    async def add_file_to_folder(self, folder_id: str, file_id: str) -> dict[str, Any]:
         """Add a file to a folder.
 
         Args:
@@ -560,9 +550,7 @@ class FilesOperations(ConnectBaseOperations):
         file_id = self._ensure_18(file_id)
         return await self._post(f"folders/{folder_id}/items", json={"id": file_id})
 
-    async def create_folder(
-        self, parent_folder_id: str, name: str
-    ) -> dict[str, Any]:
+    async def create_folder(self, parent_folder_id: str, name: str) -> dict[str, Any]:
         """Create a new folder inside an existing folder.
 
         Args:

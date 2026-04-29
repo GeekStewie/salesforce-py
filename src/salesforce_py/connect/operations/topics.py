@@ -101,9 +101,7 @@ class TopicsOperations(ConnectBaseOperations):
             Topic Endorsement dict.
         """
         endorsement_id = self._ensure_18(endorsement_id)
-        return await self._get(
-            f"{self._prefix(community_id)}topic-endorsements/{endorsement_id}"
-        )
+        return await self._get(f"{self._prefix(community_id)}topic-endorsements/{endorsement_id}")
 
     async def delete_endorsement(
         self,
@@ -145,9 +143,7 @@ class TopicsOperations(ConnectBaseOperations):
             Group Page dict.
         """
         topic_id = self._ensure_18(topic_id)
-        return await self._get(
-            f"{self._prefix(community_id)}topics/{topic_id}/groups"
-        )
+        return await self._get(f"{self._prefix(community_id)}topics/{topic_id}/groups")
 
     async def get_knowledgeable_users(
         self,
@@ -197,9 +193,7 @@ class TopicsOperations(ConnectBaseOperations):
             Topic Opt Out Collection dict.
         """
         topic_id = self._ensure_18(topic_id)
-        return await self._get(
-            f"{self._prefix(community_id)}topics/{topic_id}/topic-opt-outs"
-        )
+        return await self._get(f"{self._prefix(community_id)}topics/{topic_id}/topic-opt-outs")
 
     async def opt_out_of_topic(
         self,
@@ -217,9 +211,7 @@ class TopicsOperations(ConnectBaseOperations):
             Topic Opt Out dict.
         """
         topic_id = self._ensure_18(topic_id)
-        return await self._post(
-            f"{self._prefix(community_id)}topics/{topic_id}/topic-opt-outs"
-        )
+        return await self._post(f"{self._prefix(community_id)}topics/{topic_id}/topic-opt-outs")
 
     async def opt_in_to_topic(
         self,
@@ -237,9 +229,7 @@ class TopicsOperations(ConnectBaseOperations):
             Empty dict on success.
         """
         opt_out_id = self._ensure_18(opt_out_id)
-        return await self._delete(
-            f"{self._prefix(community_id)}topic-opt-outs/{opt_out_id}"
-        )
+        return await self._delete(f"{self._prefix(community_id)}topic-opt-outs/{opt_out_id}")
 
 
 class MentionsOperations(ConnectBaseOperations):
@@ -331,9 +321,7 @@ class LikesOperations(ConnectBaseOperations):
     def _prefix(community_id: str | None) -> str:
         return f"communities/{community_id}/" if community_id else ""
 
-    async def get_like(
-        self, like_id: str, *, community_id: str | None = None
-    ) -> dict[str, Any]:
+    async def get_like(self, like_id: str, *, community_id: str | None = None) -> dict[str, Any]:
         """Get information about a specific like.
 
         Args:
@@ -344,13 +332,9 @@ class LikesOperations(ConnectBaseOperations):
             Like detail dict.
         """
         like_id = self._ensure_18(like_id)
-        return await self._get(
-            f"{self._prefix(community_id)}chatter/likes/{like_id}"
-        )
+        return await self._get(f"{self._prefix(community_id)}chatter/likes/{like_id}")
 
-    async def delete_like(
-        self, like_id: str, *, community_id: str | None = None
-    ) -> dict[str, Any]:
+    async def delete_like(self, like_id: str, *, community_id: str | None = None) -> dict[str, Any]:
         """Remove a like.
 
         Args:
@@ -361,9 +345,7 @@ class LikesOperations(ConnectBaseOperations):
             Empty dict on success.
         """
         like_id = self._ensure_18(like_id)
-        return await self._delete(
-            f"{self._prefix(community_id)}chatter/likes/{like_id}"
-        )
+        return await self._delete(f"{self._prefix(community_id)}chatter/likes/{like_id}")
 
 
 class SubscriptionsOperations(ConnectBaseOperations):

@@ -8,16 +8,14 @@ from typing import Any
 
 _VERSION_RE = re.compile(r"^\d+(\.\d+)*$")
 
-from salesforce_py.exceptions import CLINotFoundError, SalesforcePyError
+from salesforce_py.exceptions import SalesforcePyError
 
 _log = logging.getLogger(__name__)
 
 _SF_NPM_PACKAGE = "@salesforce/cli"
 _NODE_BREW_FORMULA = "node"
 # Official Homebrew install script — see https://brew.sh
-_HOMEBREW_INSTALL_URL = (
-    "https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh"
-)
+_HOMEBREW_INSTALL_URL = "https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh"
 
 
 class SFCLISetup:
@@ -133,9 +131,7 @@ class SFCLISetup:
                 timeout=timeout,
             )
         except subprocess.TimeoutExpired as exc:
-            raise SalesforcePyError(
-                f"Homebrew installation timed out after {timeout}s"
-            ) from exc
+            raise SalesforcePyError(f"Homebrew installation timed out after {timeout}s") from exc
 
         if proc.returncode != 0:
             raise SalesforcePyError(
@@ -164,9 +160,7 @@ class SFCLISetup:
                 "{'hint': 'Run install_homebrew() first, or install Node.js manually from https://nodejs.org'}"
             )
 
-        _log.info(
-            f"Installing Node.js via Homebrew (brew install {_NODE_BREW_FORMULA})..."
-        )
+        _log.info(f"Installing Node.js via Homebrew (brew install {_NODE_BREW_FORMULA})...")
         try:
             proc = subprocess.run(
                 f"brew install {_NODE_BREW_FORMULA}",
@@ -174,9 +168,7 @@ class SFCLISetup:
                 timeout=timeout,
             )
         except subprocess.TimeoutExpired as exc:
-            raise SalesforcePyError(
-                f"Node.js installation timed out after {timeout}s"
-            ) from exc
+            raise SalesforcePyError(f"Node.js installation timed out after {timeout}s") from exc
 
         if proc.returncode != 0:
             raise SalesforcePyError(
@@ -209,7 +201,8 @@ class SFCLISetup:
         """
         if version is not None and not _VERSION_RE.match(version):
             raise SalesforcePyError(
-                f"Invalid SF CLI version string: {{'version': '{version}', 'hint': \"Expected format: '2.0.1'\"}}"
+                "Invalid SF CLI version string: "
+                f"{{'version': '{version}', 'hint': \"Expected format: '2.0.1'\"}}"
             )
 
         if self.is_sf_installed() and version is None:
@@ -234,13 +227,12 @@ class SFCLISetup:
                 timeout=timeout,
             )
         except subprocess.TimeoutExpired as exc:
-            raise SalesforcePyError(
-                f"SF CLI installation timed out after {timeout}s"
-            ) from exc
+            raise SalesforcePyError(f"SF CLI installation timed out after {timeout}s") from exc
 
         if proc.returncode != 0:
             raise SalesforcePyError(
-                f"SF CLI installation via npm failed: {{'exit_code': {proc.returncode}, 'cmd': '{cmd}'}}"
+                "SF CLI installation via npm failed: "
+                f"{{'exit_code': {proc.returncode}, 'cmd': '{cmd}'}}"
             )
         _log.info(f"SF CLI {label} installed")
 

@@ -23,9 +23,7 @@ class CLIError(SalesforcePyError):
         self.stdout = stdout
         self.stderr = stderr
         super().__init__(
-            f"`sf` exited with code {returncode}.\n"
-            f"stdout: {stdout!r}\n"
-            f"stderr: {stderr!r}"
+            f"`sf` exited with code {returncode}.\nstdout: {stdout!r}\nstderr: {stderr!r}"
         )
 
 

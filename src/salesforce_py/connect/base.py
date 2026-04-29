@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+import contextlib
 import logging
 from typing import Any
 
 import httpx
 
+from salesforce_py._retry import retry_async_http_call
 from salesforce_py.connect._session import ConnectSession
 from salesforce_py.exceptions import AuthError, SalesforcePyError
 from salesforce_py.utils.salesforce_id import convert_to_18_char
@@ -66,28 +68,28 @@ class ConnectBaseOperations:
     # ------------------------------------------------------------------
 
     async def _get(self, path: str, **kwargs: object) -> dict[str, Any]:
-        response = await self._session.get(path, **kwargs)
+        response = await retry_async_http_call(lambda: self._session.get(path, **kwargs))
         return self._handle(response)
 
     async def _get_bytes(self, path: str, **kwargs: object) -> bytes:
-        response = await self._session.get(path, **kwargs)
+        response = await retry_async_http_call(lambda: self._session.get(path, **kwargs))
         self._handle_status(response)
         return response.content
 
     async def _post(self, path: str, **kwargs: object) -> dict[str, Any]:
-        response = await self._session.post(path, **kwargs)
+        response = await retry_async_http_call(lambda: self._session.post(path, **kwargs))
         return self._handle(response)
 
     async def _patch(self, path: str, **kwargs: object) -> dict[str, Any]:
-        response = await self._session.patch(path, **kwargs)
+        response = await retry_async_http_call(lambda: self._session.patch(path, **kwargs))
         return self._handle(response)
 
     async def _put(self, path: str, **kwargs: object) -> dict[str, Any]:
-        response = await self._session.put(path, **kwargs)
+        response = await retry_async_http_call(lambda: self._session.put(path, **kwargs))
         return self._handle(response)
 
     async def _delete(self, path: str, **kwargs: object) -> dict[str, Any]:
-        response = await self._session.delete(path, **kwargs)
+        response = await retry_async_http_call(lambda: self._session.delete(path, **kwargs))
         return self._handle(response)
 
     # ------------------------------------------------------------------
@@ -114,13 +116,9 @@ class ConnectBaseOperations:
             response.raise_for_status()
         except httpx.HTTPStatusError as exc:
             body = ""
-            try:
+            with contextlib.suppress(Exception):
                 body = response.text[:500]
-            except Exception:
-                pass
-            raise SalesforcePyError(
-                f"Connect API error {response.status_code}: {body}"
-            ) from exc
+            raise SalesforcePyError(f"Connect API error {response.status_code}: {body}") from exc
 
     @staticmethod
     def _handle(response: httpx.Response) -> dict[str, Any]:

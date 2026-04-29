@@ -531,9 +531,7 @@ class SFOrgOperations(SFBaseOperations):
         Returns:
             User info dict.
         """
-        return self._run_capturing(
-            ["org", "display", "user"], label="Displaying user info"
-        )
+        return self._run_capturing(["org", "display", "user"], label="Displaying user info")
 
     # ------------------------------------------------------------------
     # generate
@@ -673,9 +671,7 @@ class SFOrgOperations(SFBaseOperations):
         Returns:
             List of limit dicts.
         """
-        result = self._run_capturing(
-            ["org", "list", "limits"], label="Listing org limits"
-        )
+        result = self._run_capturing(["org", "list", "limits"], label="Listing org limits")
         if isinstance(result, list):
             return result
         return result.get("result", [])
@@ -802,9 +798,7 @@ class SFOrgOperations(SFBaseOperations):
         Returns:
             List of user summary dicts.
         """
-        result = self._run_capturing(
-            ["org", "list", "users"], label="Listing org users"
-        )
+        result = self._run_capturing(["org", "list", "users"], label="Listing org users")
         if isinstance(result, list):
             return result
         return result.get("result", [])

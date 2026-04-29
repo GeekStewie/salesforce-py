@@ -207,7 +207,8 @@ class SFOrg:
             payload = json.loads(raw_output)
         except json.JSONDecodeError as exc:
             raise SalesforcePyError(
-                f"SF CLI returned non-JSON output: {{'cmd': '{' '.join(cmd)}', 'output': '{raw_output[:500]}'}}"
+                "SF CLI returned non-JSON output: "
+                f"{{'cmd': '{' '.join(cmd)}', 'output': '{raw_output[:500]}'}}"
             ) from exc
 
         # Surface any warnings embedded in the payload

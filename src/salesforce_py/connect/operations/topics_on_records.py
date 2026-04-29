@@ -34,9 +34,7 @@ class TopicsOnRecordsOperations(ConnectBaseOperations):
             Topic Collection dict.
         """
         record_id = self._ensure_18(record_id)
-        return await self._get(
-            f"{self._prefix(community_id)}records/{record_id}/topics"
-        )
+        return await self._get(f"{self._prefix(community_id)}records/{record_id}/topics")
 
     async def add_topic(
         self,
@@ -64,9 +62,7 @@ class TopicsOnRecordsOperations(ConnectBaseOperations):
                 ``topic_name`` are supplied.
         """
         if (topic_id is None) == (topic_name is None):
-            raise ValueError(
-                "Provide exactly one of topic_id or topic_name."
-            )
+            raise ValueError("Provide exactly one of topic_id or topic_name.")
         record_id = self._ensure_18(record_id)
         body: dict[str, Any] = {}
         if topic_id is not None:

@@ -39,9 +39,7 @@ class NotificationSettingsOperations(ConnectBaseOperations):
         Returns:
             Notification Setting dict.
         """
-        return await self._get(
-            f"notifications/settings/organization/{notification_type_or_id}"
-        )
+        return await self._get(f"notifications/settings/organization/{notification_type_or_id}")
 
     async def set_org_setting(
         self,
@@ -90,9 +88,7 @@ class NotificationSettingsOperations(ConnectBaseOperations):
         Returns:
             Empty dict on success.
         """
-        return await self._delete(
-            f"notifications/settings/organization/{notification_type_or_id}"
-        )
+        return await self._delete(f"notifications/settings/organization/{notification_type_or_id}")
 
     # ------------------------------------------------------------------
     # Notification app settings
@@ -115,9 +111,7 @@ class NotificationSettingsOperations(ConnectBaseOperations):
         params: dict[str, Any] = {}
         if application_id is not None:
             params["applicationId"] = self._ensure_18(application_id)
-        return await self._get(
-            "notifications/app-settings/organization", params=params
-        )
+        return await self._get("notifications/app-settings/organization", params=params)
 
     async def get_app_setting(
         self,

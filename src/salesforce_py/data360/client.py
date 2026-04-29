@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from salesforce_py._retry import DEFAULT_TIMEOUT
 from salesforce_py.data360._session import _DEFAULT_API_VERSION, Data360Session
 from salesforce_py.data360.operations.activation_targets import (
     ActivationTargetsOperations,
@@ -79,7 +80,7 @@ class Data360Client:
         instance_url: str,
         access_token: str,
         api_version: str = _DEFAULT_API_VERSION,
-        timeout: float = 30.0,
+        timeout: float = DEFAULT_TIMEOUT,
         http2: bool = True,
     ) -> None:
         self._session = Data360Session(

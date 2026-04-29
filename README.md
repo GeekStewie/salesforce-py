@@ -4,6 +4,12 @@
 
 <h1 align="center">salesforce-py</h1>
 
+<p align="center">
+  <a href="https://github.com/geekstewie/salesforce-py/actions/workflows/health-check.yml">
+    <img src="https://github.com/geekstewie/salesforce-py/actions/workflows/health-check.yml/badge.svg?branch=main" alt="Health Check" />
+  </a>
+</p>
+
 > **Disclaimer:** This is an independent, community-maintained project and is **not affiliated with, endorsed by, or supported by Salesforce, Inc.** Salesforce, the Salesforce CLI, and related marks are trademarks of Salesforce, Inc.
 
 A Python wrapper for Salesforce CLIs and APIs. Provides a comprehensive sync wrapper for the [Salesforce CLI (`sf`)](https://developer.salesforce.com/tools/salesforcecli) plus a fully async client for the [Salesforce Connect REST API](https://developer.salesforce.com/docs/atlas.en-us.chatterapi.meta/chatterapi/intro_what_is_chatter_connect.htm) (Chatter, Files, Communities, Commerce, Einstein, and more). REST and Bulk API clients are on the roadmap.

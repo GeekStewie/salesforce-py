@@ -52,9 +52,7 @@ class ManagedTopicsOperations(ConnectBaseOperations):
             params["pageSize"] = page_size
         if record_ids is not None:
             params["recordIds"] = ",".join(self._ensure_18_list(record_ids))
-        return await self._get(
-            f"communities/{community_id}/managed-topics", params=params
-        )
+        return await self._get(f"communities/{community_id}/managed-topics", params=params)
 
     async def create_managed_topic(
         self,
@@ -95,9 +93,7 @@ class ManagedTopicsOperations(ConnectBaseOperations):
             body["recordId"] = self._ensure_18(record_id)
         if parent_id is not None:
             body["parentId"] = self._ensure_18(parent_id)
-        return await self._post(
-            f"communities/{community_id}/managed-topics", json=body
-        )
+        return await self._post(f"communities/{community_id}/managed-topics", json=body)
 
     async def reorder_managed_topics(
         self,
@@ -116,9 +112,7 @@ class ManagedTopicsOperations(ConnectBaseOperations):
         """
         community_id = self._ensure_18(community_id)
         body = {"managedTopicPositions": positions}
-        return await self._patch(
-            f"communities/{community_id}/managed-topics", json=body
-        )
+        return await self._patch(f"communities/{community_id}/managed-topics", json=body)
 
     async def get_managed_topic(
         self,
@@ -136,9 +130,7 @@ class ManagedTopicsOperations(ConnectBaseOperations):
         """
         community_id = self._ensure_18(community_id)
         managed_topic_id = self._ensure_18(managed_topic_id)
-        return await self._get(
-            f"communities/{community_id}/managed-topics/{managed_topic_id}"
-        )
+        return await self._get(f"communities/{community_id}/managed-topics/{managed_topic_id}")
 
     async def delete_managed_topic(
         self,
@@ -156,6 +148,4 @@ class ManagedTopicsOperations(ConnectBaseOperations):
         """
         community_id = self._ensure_18(community_id)
         managed_topic_id = self._ensure_18(managed_topic_id)
-        return await self._delete(
-            f"communities/{community_id}/managed-topics/{managed_topic_id}"
-        )
+        return await self._delete(f"communities/{community_id}/managed-topics/{managed_topic_id}")

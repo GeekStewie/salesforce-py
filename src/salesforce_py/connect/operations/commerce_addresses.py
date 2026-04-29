@@ -80,8 +80,7 @@ class CommerceAddressesOperations(ConnectBaseOperations):
         account_id = self._ensure_18(account_id)
         address_id = self._ensure_18(address_id)
         return await self._patch(
-            f"commerce/webstores/{webstore_id}/accounts/{account_id}"
-            f"/addresses/{address_id}",
+            f"commerce/webstores/{webstore_id}/accounts/{account_id}/addresses/{address_id}",
             json=body,
         )
 
@@ -102,6 +101,5 @@ class CommerceAddressesOperations(ConnectBaseOperations):
         account_id = self._ensure_18(account_id)
         address_id = self._ensure_18(address_id)
         return await self._delete(
-            f"commerce/webstores/{webstore_id}/accounts/{account_id}"
-            f"/addresses/{address_id}"
+            f"commerce/webstores/{webstore_id}/accounts/{account_id}/addresses/{address_id}"
         )

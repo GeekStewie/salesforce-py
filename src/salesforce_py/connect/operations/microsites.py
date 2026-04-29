@@ -39,9 +39,7 @@ class MicrositesOperations(ConnectBaseOperations):
             "memberIdentificationCode": member_identification_code,
             "formFieldsList": {"formFields": form_fields},
         }
-        return await self._post(
-            f"sites/{site_id}/marketing-integration/forms", json=body
-        )
+        return await self._post(f"sites/{site_id}/marketing-integration/forms", json=body)
 
     async def get_form(
         self,
@@ -58,9 +56,7 @@ class MicrositesOperations(ConnectBaseOperations):
             Form dict.
         """
         site_id = self._ensure_18(site_id)
-        return await self._get(
-            f"sites/{site_id}/marketing-integration/forms/{form_id}"
-        )
+        return await self._get(f"sites/{site_id}/marketing-integration/forms/{form_id}")
 
     async def submit_form(
         self,

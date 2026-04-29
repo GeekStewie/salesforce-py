@@ -60,9 +60,7 @@ class DuplicateOperations(ConnectBaseOperations):
             Duplicate Job dict.
         """
         job_definition_id = self._ensure_18(job_definition_id)
-        return await self._post(
-            "dedupe/jobs", json={"duplicateJobDefId": job_definition_id}
-        )
+        return await self._post("dedupe/jobs", json={"duplicateJobDefId": job_definition_id})
 
     async def get_job(self, job_id: str) -> dict[str, Any]:
         """Get status of a duplicate job.
@@ -88,9 +86,7 @@ class DuplicateOperations(ConnectBaseOperations):
             Duplicate Job dict.
         """
         job_id = self._ensure_18(job_id)
-        return await self._patch(
-            f"dedupe/jobs/{job_id}", json={"status": "Canceled"}
-        )
+        return await self._patch(f"dedupe/jobs/{job_id}", json={"status": "Canceled"})
 
     async def delete_job_results(self, job_id: str) -> dict[str, Any]:
         """Delete duplicate job results.

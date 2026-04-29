@@ -120,9 +120,7 @@ class PersonalizationAudiencesOperations(ConnectBaseOperations):
         """
         community_id = self._ensure_18(community_id)
         ids = ",".join(self._ensure_18_list(audience_ids))
-        return await self._get(
-            f"communities/{community_id}/personalization/audiences/batch/{ids}"
-        )
+        return await self._get(f"communities/{community_id}/personalization/audiences/batch/{ids}")
 
     # ------------------------------------------------------------------
     # Single audience
@@ -194,9 +192,7 @@ class PersonalizationAudiencesOperations(ConnectBaseOperations):
             json=payload,
         )
 
-    async def delete_audience(
-        self, community_id: str, audience_id: str
-    ) -> dict[str, Any]:
+    async def delete_audience(self, community_id: str, audience_id: str) -> dict[str, Any]:
         """Delete an audience (v47.0+).
 
         Args:
@@ -313,9 +309,7 @@ class PersonalizationAudiencesOperations(ConnectBaseOperations):
             json={"targets": targets},
         )
 
-    async def get_targets_batch(
-        self, community_id: str, target_ids: list[str]
-    ) -> dict[str, Any]:
+    async def get_targets_batch(self, community_id: str, target_ids: list[str]) -> dict[str, Any]:
         """Get target information for a batch of target IDs (v47.0+).
 
         Args:
@@ -327,17 +321,13 @@ class PersonalizationAudiencesOperations(ConnectBaseOperations):
         """
         community_id = self._ensure_18(community_id)
         ids = ",".join(self._ensure_18_list(target_ids))
-        return await self._get(
-            f"communities/{community_id}/personalization/targets/batch/{ids}"
-        )
+        return await self._get(f"communities/{community_id}/personalization/targets/batch/{ids}")
 
     # ------------------------------------------------------------------
     # Single target
     # ------------------------------------------------------------------
 
-    async def get_target(
-        self, community_id: str, target_id: str
-    ) -> dict[str, Any]:
+    async def get_target(self, community_id: str, target_id: str) -> dict[str, Any]:
         """Get a target (v47.0+).
 
         Args:
@@ -349,13 +339,9 @@ class PersonalizationAudiencesOperations(ConnectBaseOperations):
         """
         community_id = self._ensure_18(community_id)
         target_id = self._ensure_18(target_id)
-        return await self._get(
-            f"communities/{community_id}/personalization/targets/{target_id}"
-        )
+        return await self._get(f"communities/{community_id}/personalization/targets/{target_id}")
 
-    async def delete_target(
-        self, community_id: str, target_id: str
-    ) -> dict[str, Any]:
+    async def delete_target(self, community_id: str, target_id: str) -> dict[str, Any]:
         """Delete a target (v47.0+).
 
         Args:
@@ -367,6 +353,4 @@ class PersonalizationAudiencesOperations(ConnectBaseOperations):
         """
         community_id = self._ensure_18(community_id)
         target_id = self._ensure_18(target_id)
-        return await self._delete(
-            f"communities/{community_id}/personalization/targets/{target_id}"
-        )
+        return await self._delete(f"communities/{community_id}/personalization/targets/{target_id}")

@@ -53,9 +53,7 @@ class CustomDomainOperations(ConnectBaseOperations):
         Returns:
             Custom Domain CNAME for Domain Verification dict.
         """
-        return await self._get(
-            f"custom-domain/domains/{domain_name}/expected-cname"
-        )
+        return await self._get(f"custom-domain/domains/{domain_name}/expected-cname")
 
     async def get_expected_cdn_cname(self, domain_name: str) -> dict[str, Any]:
         """Get the CNAME record required for the Salesforce CDN (v63.0+).
@@ -66,9 +64,7 @@ class CustomDomainOperations(ConnectBaseOperations):
         Returns:
             Custom Domain CNAME for the Salesforce CDN dict.
         """
-        return await self._get(
-            f"custom-domain/domains/{domain_name}/expected-cdn-validation-cname"
-        )
+        return await self._get(f"custom-domain/domains/{domain_name}/expected-cdn-validation-cname")
 
     async def list_custom_urls(self, domain_id: str) -> dict[str, Any]:
         """Get custom URLs for a custom domain (v62.0+).
@@ -79,13 +75,9 @@ class CustomDomainOperations(ConnectBaseOperations):
         Returns:
             Custom Domain Custom URL Collection dict.
         """
-        return await self._get(
-            f"custom-domain/domains/{domain_id}/custom-urls"
-        )
+        return await self._get(f"custom-domain/domains/{domain_id}/custom-urls")
 
-    async def get_custom_url(
-        self, domain_id: str, custom_url_id: str
-    ) -> dict[str, Any]:
+    async def get_custom_url(self, domain_id: str, custom_url_id: str) -> dict[str, Any]:
         """Get information about a custom URL (v62.0+).
 
         Args:
@@ -95,9 +87,7 @@ class CustomDomainOperations(ConnectBaseOperations):
         Returns:
             Custom URL Detail dict.
         """
-        return await self._get(
-            f"custom-domain/domains/{domain_id}/custom-urls/{custom_url_id}"
-        )
+        return await self._get(f"custom-domain/domains/{domain_id}/custom-urls/{custom_url_id}")
 
     async def get_pending_configuration(self, domain_id: str) -> dict[str, Any]:
         """Get pending configuration options for a custom domain (v66.0+).
@@ -108,13 +98,9 @@ class CustomDomainOperations(ConnectBaseOperations):
         Returns:
             Custom Domain Pending Configuration Detail dict.
         """
-        return await self._get(
-            f"custom-domain/domains/{domain_id}/pending-configuration"
-        )
+        return await self._get(f"custom-domain/domains/{domain_id}/pending-configuration")
 
-    async def list_site_custom_urls(
-        self, store_or_site_id: str
-    ) -> dict[str, Any]:
+    async def list_site_custom_urls(self, store_or_site_id: str) -> dict[str, Any]:
         """Get custom URLs for a custom domain on a site or store (v63.0+).
 
         Args:
@@ -124,6 +110,4 @@ class CustomDomainOperations(ConnectBaseOperations):
             Custom Domain Custom URL Collection dict.
         """
         store_or_site_id = self._ensure_18(store_or_site_id)
-        return await self._get(
-            f"custom-domain/domains/sites/{store_or_site_id}/custom-urls"
-        )
+        return await self._get(f"custom-domain/domains/sites/{store_or_site_id}/custom-urls")

@@ -77,9 +77,7 @@ class CMSManagedContentOperations(ConnectBaseOperations):
         if language is not None:
             params["language"] = language
         if managed_content_ids:
-            params["managedContentIds"] = ",".join(
-                self._ensure_18_list(managed_content_ids)
-            )
+            params["managedContentIds"] = ",".join(self._ensure_18_list(managed_content_ids))
         if managed_content_type is not None:
             params["managedContentType"] = managed_content_type
         if page is not None:
@@ -205,9 +203,7 @@ class CMSManagedContentOperations(ConnectBaseOperations):
         if language is not None:
             params["language"] = language
         if managed_content_ids:
-            params["managedContentIds"] = ",".join(
-                self._ensure_18_list(managed_content_ids)
-            )
+            params["managedContentIds"] = ",".join(self._ensure_18_list(managed_content_ids))
         if managed_content_type is not None:
             params["managedContentType"] = managed_content_type
         if page is not None:
@@ -216,9 +212,7 @@ class CMSManagedContentOperations(ConnectBaseOperations):
             params["showAbsoluteUrl"] = show_absolute_url
         if start_date is not None:
             params["startDate"] = start_date
-        return await self._get(
-            f"cms/delivery/channels/{channel_id}/contents/query", params=params
-        )
+        return await self._get(f"cms/delivery/channels/{channel_id}/contents/query", params=params)
 
     async def search_channel_contents(
         self,
@@ -250,9 +244,7 @@ class CMSManagedContentOperations(ConnectBaseOperations):
             params["page"] = page
         if scope is not None:
             params["scope"] = scope
-        return await self._get(
-            f"cms/delivery/channels/{channel_id}/contents/search", params=params
-        )
+        return await self._get(f"cms/delivery/channels/{channel_id}/contents/search", params=params)
 
     async def get_delivery_media_content(
         self,
@@ -305,9 +297,7 @@ class CMSManagedContentOperations(ConnectBaseOperations):
         params: dict[str, Any] = {"pageSize": page_size}
         if page is not None:
             params["page"] = page
-        return await self._get(
-            f"cms/channels/{channel_id}/searchable-content-types", params=params
-        )
+        return await self._get(f"cms/channels/{channel_id}/searchable-content-types", params=params)
 
     async def update_searchable_content_type(
         self,
@@ -367,9 +357,7 @@ class CMSManagedContentOperations(ConnectBaseOperations):
             params["variantVersion"] = variant_version
         if version is not None:
             params["version"] = version
-        return await self._get(
-            f"cms/contents/{content_key_or_id}", params=params or None
-        )
+        return await self._get(f"cms/contents/{content_key_or_id}", params=params or None)
 
     async def get_folder(
         self,
@@ -390,12 +378,8 @@ class CMSManagedContentOperations(ConnectBaseOperations):
         folder_id = self._ensure_18(folder_id)
         params: dict[str, Any] = {}
         if context_content_space_id is not None:
-            params["contextContentSpaceId"] = self._ensure_18(
-                context_content_space_id
-            )
-        return await self._get(
-            f"cms/folders/{folder_id}", params=params or None
-        )
+            params["contextContentSpaceId"] = self._ensure_18(context_content_space_id)
+        return await self._get(f"cms/folders/{folder_id}", params=params or None)
 
 
 class CMSWorkspacesOperations(ConnectBaseOperations):
@@ -640,9 +624,7 @@ class CMSWorkspacesOperations(ConnectBaseOperations):
         if language is not None:
             params["language"] = language
         if managed_content_ids:
-            params["managedContentIds"] = ",".join(
-                self._ensure_18_list(managed_content_ids)
-            )
+            params["managedContentIds"] = ",".join(self._ensure_18_list(managed_content_ids))
         if page is not None:
             params["page"] = page
         if publish_end_date is not None:
@@ -699,9 +681,7 @@ class CMSWorkspacesOperations(ConnectBaseOperations):
             params["referencesAsList"] = references_as_list
         if show_absolute_url is not None:
             params["showAbsoluteUrl"] = show_absolute_url
-        return await self._get(
-            f"{base}/contents/{content_key_or_id}", params=params or None
-        )
+        return await self._get(f"{base}/contents/{content_key_or_id}", params=params or None)
 
     async def enhanced_search(
         self,
@@ -779,9 +759,7 @@ class CMSWorkspacesOperations(ConnectBaseOperations):
             params["isIncremental"] = is_incremental
         if fallback_to_full_index is not None:
             params["fallbackToFullIndex"] = fallback_to_full_index
-        return await self._post(
-            f"cms/channels/{channel_id}/search/indexes", params=params or None
-        )
+        return await self._post(f"cms/channels/{channel_id}/search/indexes", params=params or None)
 
     # ------------------------------------------------------------------
     # Contents
@@ -856,20 +834,14 @@ class CMSWorkspacesOperations(ConnectBaseOperations):
         if api_name is not None:
             payload["apiName"] = api_name
         if content_space_or_folder_id is not None:
-            payload["contentSpaceOrFolderId"] = self._ensure_18(
-                content_space_or_folder_id
-            )
+            payload["contentSpaceOrFolderId"] = self._ensure_18(content_space_or_folder_id)
         if include_variants is not None:
             payload["includeVariants"] = include_variants
         if title is not None:
             payload["title"] = title
-        return await self._post(
-            f"cms/contents/{content_key_or_id}/clone", json=payload
-        )
+        return await self._post(f"cms/contents/{content_key_or_id}/clone", json=payload)
 
-    async def get_content_taxonomy_terms(
-        self, content_key_or_id: str
-    ) -> dict[str, Any]:
+    async def get_content_taxonomy_terms(self, content_key_or_id: str) -> dict[str, Any]:
         """Get taxonomy terms associated with managed content.
 
         Args:
@@ -878,9 +850,7 @@ class CMSWorkspacesOperations(ConnectBaseOperations):
         Returns:
             Managed Content Taxonomy Term Collection dict.
         """
-        return await self._get(
-            f"cms/contents/{content_key_or_id}/taxonomy-terms"
-        )
+        return await self._get(f"cms/contents/{content_key_or_id}/taxonomy-terms")
 
     async def update_content_taxonomy_terms(
         self,
@@ -945,9 +915,7 @@ class CMSWorkspacesOperations(ConnectBaseOperations):
         if variant_ids is not None:
             payload["variantIds"] = self._ensure_18_list(variant_ids)
         if context_content_space_id is not None:
-            payload["contextContentSpaceId"] = self._ensure_18(
-                context_content_space_id
-            )
+            payload["contextContentSpaceId"] = self._ensure_18(context_content_space_id)
         if description is not None:
             payload["description"] = description
         if include_content_references is not None:
@@ -979,9 +947,7 @@ class CMSWorkspacesOperations(ConnectBaseOperations):
         if variant_ids is not None:
             payload["variantIds"] = self._ensure_18_list(variant_ids)
         if context_content_space_id is not None:
-            payload["contextContentSpaceId"] = self._ensure_18(
-                context_content_space_id
-            )
+            payload["contextContentSpaceId"] = self._ensure_18(context_content_space_id)
         if description is not None:
             payload["description"] = description
         return await self._post("cms/contents/unpublish", json=payload)
@@ -1100,9 +1066,7 @@ class CMSWorkspacesOperations(ConnectBaseOperations):
         params: dict[str, Any] = {}
         if content_space_id is not None:
             params["contentSpaceId"] = self._ensure_18(content_space_id)
-        return await self._get(
-            "cms/digital-asset-management-providers", params=params or None
-        )
+        return await self._get("cms/digital-asset-management-providers", params=params or None)
 
     async def create_dam_provider(
         self,
@@ -1129,9 +1093,7 @@ class CMSWorkspacesOperations(ConnectBaseOperations):
             "isDefault": is_default,
             "providerLightningComponentId": provider_lightning_component_id,
         }
-        return await self._post(
-            "cms/digital-asset-management-providers", json=payload
-        )
+        return await self._post("cms/digital-asset-management-providers", json=payload)
 
     async def update_dam_provider(
         self,
@@ -1165,9 +1127,7 @@ class CMSWorkspacesOperations(ConnectBaseOperations):
             json=payload,
         )
 
-    async def delete_dam_provider(
-        self, provider_instance_id: str
-    ) -> dict[str, Any]:
+    async def delete_dam_provider(self, provider_instance_id: str) -> dict[str, Any]:
         """Delete a DAM provider instance.
 
         A DAM provider instance in use can't be deleted; delete the
@@ -1180,9 +1140,7 @@ class CMSWorkspacesOperations(ConnectBaseOperations):
             Empty dict on success.
         """
         provider_instance_id = self._ensure_18(provider_instance_id)
-        return await self._delete(
-            f"cms/digital-asset-management-providers/{provider_instance_id}"
-        )
+        return await self._delete(f"cms/digital-asset-management-providers/{provider_instance_id}")
 
     # ------------------------------------------------------------------
     # Folder shares
@@ -1220,14 +1178,10 @@ class CMSWorkspacesOperations(ConnectBaseOperations):
         folder_id = self._ensure_18(folder_id)
         payload: dict[str, Any] = {}
         if share_with is not None:
-            payload["shareWith"] = [
-                {"targetId": self._ensure_18(tid)} for tid in share_with
-            ]
+            payload["shareWith"] = [{"targetId": self._ensure_18(tid)} for tid in share_with]
         if unshare_with is not None:
             payload["unshareWith"] = self._ensure_18_list(unshare_with)
-        return await self._patch(
-            f"cms/folders/{folder_id}/shares", json=payload
-        )
+        return await self._patch(f"cms/folders/{folder_id}/shares", json=payload)
 
     async def get_folder_share_targets(self, folder_id: str) -> dict[str, Any]:
         """Get targets that a managed content space folder can be shared with.
@@ -1407,9 +1361,7 @@ class CMSWorkspacesOperations(ConnectBaseOperations):
         params: dict[str, Any] = {"pageSize": page_size}
         if page is not None:
             params["page"] = page
-        return await self._get(
-            f"cms/spaces/{content_space_id}/channels", params=params
-        )
+        return await self._get(f"cms/spaces/{content_space_id}/channels", params=params)
 
     async def update_space_channels(
         self,
@@ -1428,21 +1380,15 @@ class CMSWorkspacesOperations(ConnectBaseOperations):
         """
         content_space_id = self._ensure_18(content_space_id)
         payload = {"spaceChannels": space_channels}
-        return await self._patch(
-            f"cms/spaces/{content_space_id}/channels", json=payload
-        )
+        return await self._patch(f"cms/spaces/{content_space_id}/channels", json=payload)
 
     # ------------------------------------------------------------------
     # Helpers
     # ------------------------------------------------------------------
 
-    def _delivery_base(
-        self, *, channel_id: str | None, site_id: str | None
-    ) -> str:
+    def _delivery_base(self, *, channel_id: str | None, site_id: str | None) -> str:
         if bool(channel_id) == bool(site_id):
-            raise ValueError(
-                "Pass exactly one of channel_id or site_id."
-            )
+            raise ValueError("Pass exactly one of channel_id or site_id.")
         if channel_id is not None:
             return f"cms/delivery/channels/{self._ensure_18(channel_id)}"
         assert site_id is not None

@@ -1,2 +1,5 @@
-[tool.ty.environment]
+[environment]
 python-version = "3.12"
+
+[rules]
+unresolved-import = "ignore"

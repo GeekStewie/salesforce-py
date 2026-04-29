@@ -111,9 +111,7 @@ class NextBestActionOperations(ConnectBaseOperations):
             params["pageSize"] = page_size
         if target_id is not None:
             params["targetId"] = self._ensure_18(target_id)
-        return await self._get(
-            "recommendation-strategies/reactions", params=params
-        )
+        return await self._get("recommendation-strategies/reactions", params=params)
 
     async def record_reaction(
         self,
@@ -173,9 +171,7 @@ class NextBestActionOperations(ConnectBaseOperations):
             payload["recommendationMode"] = recommendation_mode
         if recommendation_score is not None:
             payload["recommendationScore"] = recommendation_score
-        return await self._post(
-            "recommendation-strategies/reactions", json=payload
-        )
+        return await self._post("recommendation-strategies/reactions", json=payload)
 
     # ------------------------------------------------------------------
     # Single reaction
@@ -191,9 +187,7 @@ class NextBestActionOperations(ConnectBaseOperations):
             Recommendation Reaction dict.
         """
         reaction_id = self._ensure_18(reaction_id)
-        return await self._get(
-            f"recommendation-strategies/reactions/{reaction_id}"
-        )
+        return await self._get(f"recommendation-strategies/reactions/{reaction_id}")
 
     async def delete_reaction(self, reaction_id: str) -> dict[str, Any]:
         """Delete a recommendation reaction (v45.0+).
@@ -205,6 +199,4 @@ class NextBestActionOperations(ConnectBaseOperations):
             Empty dict on success.
         """
         reaction_id = self._ensure_18(reaction_id)
-        return await self._delete(
-            f"recommendation-strategies/reactions/{reaction_id}"
-        )
+        return await self._delete(f"recommendation-strategies/reactions/{reaction_id}")

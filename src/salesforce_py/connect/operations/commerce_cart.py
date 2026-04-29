@@ -46,9 +46,7 @@ class CommerceCartOperations(ConnectBaseOperations):
         params: dict[str, Any] = {}
         if effective_account_id is not None:
             params["effectiveAccountId"] = self._ensure_18(effective_account_id)
-        return await self._get(
-            f"{self._base(webstore_id)}/compact-summary", params=params
-        )
+        return await self._get(f"{self._base(webstore_id)}/compact-summary", params=params)
 
     async def get_cart(
         self,
@@ -67,9 +65,7 @@ class CommerceCartOperations(ConnectBaseOperations):
         Returns:
             Cart Summary dict.
         """
-        return await self._get(
-            f"{self._base(webstore_id)}/{cart_state_or_id}", params=params or {}
-        )
+        return await self._get(f"{self._base(webstore_id)}/{cart_state_or_id}", params=params or {})
 
     async def delete_cart(
         self, webstore_id: str, cart_state_or_id: str = "active"
@@ -83,13 +79,9 @@ class CommerceCartOperations(ConnectBaseOperations):
         Returns:
             Empty dict on success.
         """
-        return await self._delete(
-            f"{self._base(webstore_id)}/{cart_state_or_id}"
-        )
+        return await self._delete(f"{self._base(webstore_id)}/{cart_state_or_id}")
 
-    async def calculate(
-        self, webstore_id: str, cart_state_or_id: str = "active"
-    ) -> dict[str, Any]:
+    async def calculate(self, webstore_id: str, cart_state_or_id: str = "active") -> dict[str, Any]:
         """Perform a complete cart calculation.
 
         Args:
@@ -99,17 +91,14 @@ class CommerceCartOperations(ConnectBaseOperations):
         Returns:
             Cart Calculation Output dict.
         """
-        return await self._post(
-            f"{self._base(webstore_id)}/{cart_state_or_id}/actions/calculate"
-        )
+        return await self._post(f"{self._base(webstore_id)}/{cart_state_or_id}/actions/calculate")
 
     async def evaluate_shipping(
         self, webstore_id: str, cart_state_or_id: str = "active"
     ) -> dict[str, Any]:
         """Evaluate shipping costs for a cart."""
         return await self._post(
-            f"{self._base(webstore_id)}/{cart_state_or_id}"
-            "/actions/evaluate-shipping"
+            f"{self._base(webstore_id)}/{cart_state_or_id}/actions/evaluate-shipping"
         )
 
     async def evaluate_taxes(
@@ -117,8 +106,7 @@ class CommerceCartOperations(ConnectBaseOperations):
     ) -> dict[str, Any]:
         """Evaluate taxes for a cart."""
         return await self._post(
-            f"{self._base(webstore_id)}/{cart_state_or_id}"
-            "/actions/evaluate-taxes"
+            f"{self._base(webstore_id)}/{cart_state_or_id}/actions/evaluate-taxes"
         )
 
     async def add_cart_to_wishlist(
@@ -138,34 +126,23 @@ class CommerceCartOperations(ConnectBaseOperations):
             Wishlist dict.
         """
         return await self._post(
-            f"{self._base(webstore_id)}/{cart_state_or_id}"
-            "/actions/add-cart-to-wishlist",
+            f"{self._base(webstore_id)}/{cart_state_or_id}/actions/add-cart-to-wishlist",
             json=body,
         )
 
-    async def clone(
-        self, webstore_id: str, cart_state_or_id: str
-    ) -> dict[str, Any]:
+    async def clone(self, webstore_id: str, cart_state_or_id: str) -> dict[str, Any]:
         """Clone an existing cart."""
-        return await self._post(
-            f"{self._base(webstore_id)}/{cart_state_or_id}/actions/clone"
-        )
+        return await self._post(f"{self._base(webstore_id)}/{cart_state_or_id}/actions/clone")
 
-    async def make_primary(
-        self, webstore_id: str, cart_state_or_id: str
-    ) -> dict[str, Any]:
+    async def make_primary(self, webstore_id: str, cart_state_or_id: str) -> dict[str, Any]:
         """Make a secondary cart a primary cart."""
         return await self._post(
             f"{self._base(webstore_id)}/{cart_state_or_id}/actions/make-primary"
         )
 
-    async def preserve(
-        self, webstore_id: str, cart_state_or_id: str
-    ) -> dict[str, Any]:
+    async def preserve(self, webstore_id: str, cart_state_or_id: str) -> dict[str, Any]:
         """Preserve cart contents when a guest logs in."""
-        return await self._post(
-            f"{self._base(webstore_id)}/{cart_state_or_id}/actions/preserve"
-        )
+        return await self._post(f"{self._base(webstore_id)}/{cart_state_or_id}/actions/preserve")
 
     async def set_message_visibility(
         self,
@@ -175,8 +152,7 @@ class CommerceCartOperations(ConnectBaseOperations):
     ) -> dict[str, Any]:
         """Set the visibility for cart messages."""
         return await self._post(
-            f"{self._base(webstore_id)}/{cart_state_or_id}"
-            "/messages/actions/set-visibility",
+            f"{self._base(webstore_id)}/{cart_state_or_id}/messages/actions/set-visibility",
             json=body,
         )
 
@@ -186,9 +162,7 @@ class CommerceCartOperations(ConnectBaseOperations):
         self, webstore_id: str, cart_state_or_id: str = "active"
     ) -> dict[str, Any]:
         """Get coupons associated with a cart."""
-        return await self._get(
-            f"{self._base(webstore_id)}/{cart_state_or_id}/cart-coupons"
-        )
+        return await self._get(f"{self._base(webstore_id)}/{cart_state_or_id}/cart-coupons")
 
     async def apply_coupon(
         self,
@@ -215,8 +189,7 @@ class CommerceCartOperations(ConnectBaseOperations):
         """Delete a coupon from a cart."""
         cart_coupon_id = self._ensure_18(cart_coupon_id)
         return await self._delete(
-            f"{self._base(webstore_id)}/{cart_state_or_id}"
-            f"/cart-coupons/{cart_coupon_id}"
+            f"{self._base(webstore_id)}/{cart_state_or_id}/cart-coupons/{cart_coupon_id}"
         )
 
     # Cart items / products
@@ -250,9 +223,7 @@ class CommerceCartOperations(ConnectBaseOperations):
         self, webstore_id: str, cart_state_or_id: str = "active"
     ) -> dict[str, Any]:
         """Get promotions associated with a cart."""
-        return await self._get(
-            f"{self._base(webstore_id)}/{cart_state_or_id}/promotions"
-        )
+        return await self._get(f"{self._base(webstore_id)}/{cart_state_or_id}/promotions")
 
     async def list_items(
         self,
@@ -305,8 +276,7 @@ class CommerceCartOperations(ConnectBaseOperations):
         """Update an item in a cart."""
         cart_item_id = self._ensure_18(cart_item_id)
         return await self._patch(
-            f"{self._base(webstore_id)}/{cart_state_or_id}"
-            f"/cart-items/{cart_item_id}",
+            f"{self._base(webstore_id)}/{cart_state_or_id}/cart-items/{cart_item_id}",
             json=body,
         )
 
@@ -319,8 +289,7 @@ class CommerceCartOperations(ConnectBaseOperations):
         """Delete an item from a cart."""
         cart_item_id = self._ensure_18(cart_item_id)
         return await self._delete(
-            f"{self._base(webstore_id)}/{cart_state_or_id}"
-            f"/cart-items/{cart_item_id}"
+            f"{self._base(webstore_id)}/{cart_state_or_id}/cart-items/{cart_item_id}"
         )
 
     async def list_item_promotions(
@@ -339,8 +308,7 @@ class CommerceCartOperations(ConnectBaseOperations):
     ) -> dict[str, Any]:
         """Apply a saved configuration context to a cart item."""
         return await self._post(
-            f"{self._base(webstore_id)}/{cart_state_or_id}"
-            "/cart-items/actions/apply-configuration",
+            f"{self._base(webstore_id)}/{cart_state_or_id}/cart-items/actions/apply-configuration",
             json=body,
         )
 
@@ -350,9 +318,7 @@ class CommerceCartOperations(ConnectBaseOperations):
         self, webstore_id: str, cart_state_or_id: str = "active"
     ) -> dict[str, Any]:
         """Get the delivery groups of a cart."""
-        return await self._get(
-            f"{self._base(webstore_id)}/{cart_state_or_id}/delivery-groups"
-        )
+        return await self._get(f"{self._base(webstore_id)}/{cart_state_or_id}/delivery-groups")
 
     async def create_delivery_group(
         self,
@@ -375,8 +341,7 @@ class CommerceCartOperations(ConnectBaseOperations):
         """Get a delivery group."""
         delivery_group_id = self._ensure_18(delivery_group_id)
         return await self._get(
-            f"{self._base(webstore_id)}/{cart_state_or_id}"
-            f"/delivery-groups/{delivery_group_id}"
+            f"{self._base(webstore_id)}/{cart_state_or_id}/delivery-groups/{delivery_group_id}"
         )
 
     async def update_delivery_group(
@@ -389,8 +354,7 @@ class CommerceCartOperations(ConnectBaseOperations):
         """Update a delivery group."""
         delivery_group_id = self._ensure_18(delivery_group_id)
         return await self._patch(
-            f"{self._base(webstore_id)}/{cart_state_or_id}"
-            f"/delivery-groups/{delivery_group_id}",
+            f"{self._base(webstore_id)}/{cart_state_or_id}/delivery-groups/{delivery_group_id}",
             json=body,
         )
 
@@ -403,8 +367,7 @@ class CommerceCartOperations(ConnectBaseOperations):
         """Delete a delivery group."""
         delivery_group_id = self._ensure_18(delivery_group_id)
         return await self._delete(
-            f"{self._base(webstore_id)}/{cart_state_or_id}"
-            f"/delivery-groups/{delivery_group_id}"
+            f"{self._base(webstore_id)}/{cart_state_or_id}/delivery-groups/{delivery_group_id}"
         )
 
     async def arrange_delivery_group_items(
@@ -415,7 +378,6 @@ class CommerceCartOperations(ConnectBaseOperations):
     ) -> dict[str, Any]:
         """Arrange cart items into delivery groups."""
         return await self._post(
-            f"{self._base(webstore_id)}/{cart_state_or_id}"
-            "/delivery-groups/actions/arrange-items",
+            f"{self._base(webstore_id)}/{cart_state_or_id}/delivery-groups/actions/arrange-items",
             json=body,
         )

@@ -75,9 +75,7 @@ class UsersOperations(ConnectBaseOperations):
             User Detail dict.
         """
         user_id = self._ensure_18(user_id)
-        return await self._get(
-            f"{self._prefix(community_id)}chatter/users/{user_id}"
-        )
+        return await self._get(f"{self._prefix(community_id)}chatter/users/{user_id}")
 
     async def update_user(
         self,
@@ -97,9 +95,7 @@ class UsersOperations(ConnectBaseOperations):
             Updated User Detail dict.
         """
         user_id = self._ensure_18(user_id)
-        return await self._patch(
-            f"{self._prefix(community_id)}chatter/users/{user_id}", json=user
-        )
+        return await self._patch(f"{self._prefix(community_id)}chatter/users/{user_id}", json=user)
 
     async def get_users_batch(
         self,
@@ -516,9 +512,7 @@ class UsersOperations(ConnectBaseOperations):
             User Chatter Settings dict.
         """
         user_id = self._ensure_18(user_id)
-        return await self._get(
-            f"{self._prefix(community_id)}chatter/users/{user_id}/settings"
-        )
+        return await self._get(f"{self._prefix(community_id)}chatter/users/{user_id}/settings")
 
     async def get_user_topics(
         self, user_id: str = "me", *, community_id: str | None = None
@@ -533,9 +527,7 @@ class UsersOperations(ConnectBaseOperations):
             Topic Collection dict.
         """
         user_id = self._ensure_18(user_id)
-        return await self._get(
-            f"{self._prefix(community_id)}chatter/users/{user_id}/topics"
-        )
+        return await self._get(f"{self._prefix(community_id)}chatter/users/{user_id}/topics")
 
     async def get_knowledgeable_about_topics(
         self, user_id: str = "me", *, community_id: str | None = None
@@ -554,9 +546,7 @@ class UsersOperations(ConnectBaseOperations):
             f"{self._prefix(community_id)}chatter/users/{user_id}/knowledgeable-about-topics"
         )
 
-    async def get_reputation(
-        self, user_id: str, community_id: str
-    ) -> dict[str, Any]:
+    async def get_reputation(self, user_id: str, community_id: str) -> dict[str, Any]:
         """Get a user's reputation in an Experience Cloud site.
 
         Args:
@@ -567,9 +557,7 @@ class UsersOperations(ConnectBaseOperations):
             Reputation dict.
         """
         user_id = self._ensure_18(user_id)
-        return await self._get(
-            f"communities/{community_id}/chatter/users/{user_id}/reputation"
-        )
+        return await self._get(f"communities/{community_id}/chatter/users/{user_id}/reputation")
 
 
 class UserProfilesOperations(ConnectBaseOperations):
@@ -584,9 +572,7 @@ class UserProfilesOperations(ConnectBaseOperations):
     def _prefix(community_id: str | None) -> str:
         return f"communities/{community_id}/" if community_id else ""
 
-    async def get_profile(
-        self, user_id: str, *, community_id: str | None = None
-    ) -> dict[str, Any]:
+    async def get_profile(self, user_id: str, *, community_id: str | None = None) -> dict[str, Any]:
         """Get details about a user's profile.
 
         Args:
@@ -597,13 +583,9 @@ class UserProfilesOperations(ConnectBaseOperations):
             User Profile dict.
         """
         user_id = self._ensure_18(user_id)
-        return await self._get(
-            f"{self._prefix(community_id)}user-profiles/{user_id}"
-        )
+        return await self._get(f"{self._prefix(community_id)}user-profiles/{user_id}")
 
-    async def get_photo(
-        self, user_id: str, *, community_id: str | None = None
-    ) -> dict[str, Any]:
+    async def get_photo(self, user_id: str, *, community_id: str | None = None) -> dict[str, Any]:
         """Get a user's profile photo metadata.
 
         Args:
@@ -614,9 +596,7 @@ class UserProfilesOperations(ConnectBaseOperations):
             Photo metadata dict.
         """
         user_id = self._ensure_18(user_id)
-        return await self._get(
-            f"{self._prefix(community_id)}user-profiles/{user_id}/photo"
-        )
+        return await self._get(f"{self._prefix(community_id)}user-profiles/{user_id}/photo")
 
     async def set_photo(
         self,
@@ -675,9 +655,7 @@ class UserProfilesOperations(ConnectBaseOperations):
             Empty dict on success.
         """
         user_id = self._ensure_18(user_id)
-        return await self._delete(
-            f"{self._prefix(community_id)}user-profiles/{user_id}/photo"
-        )
+        return await self._delete(f"{self._prefix(community_id)}user-profiles/{user_id}/photo")
 
     async def get_banner_photo(
         self, user_id: str, *, community_id: str | None = None
@@ -692,9 +670,7 @@ class UserProfilesOperations(ConnectBaseOperations):
             Banner Photo metadata dict.
         """
         user_id = self._ensure_18(user_id)
-        return await self._get(
-            f"{self._prefix(community_id)}user-profiles/{user_id}/banner-photo"
-        )
+        return await self._get(f"{self._prefix(community_id)}user-profiles/{user_id}/banner-photo")
 
     async def set_banner_photo(
         self,

@@ -56,6 +56,4 @@ class MotifsOperations(ConnectBaseOperations):
             Batch Results dict.
         """
         joined = ",".join(self._ensure_18_list(ids_or_prefixes))
-        return await self._get(
-            f"{self._prefix(community_id)}motifs/batch/{joined}"
-        )
+        return await self._get(f"{self._prefix(community_id)}motifs/batch/{joined}")

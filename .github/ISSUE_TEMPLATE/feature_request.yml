@@ -1,0 +1,74 @@
+name: Feature request
+description: Suggest a new feature, API surface, or enhancement.
+title: "[Feature]: "
+labels: ["enhancement", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting an improvement. Please search [existing issues](https://github.com/geekstewie/salesforce-py/issues) and [discussions](https://github.com/geekstewie/salesforce-py/discussions) first to avoid duplicates.
+
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: Pre-flight checks
+      options:
+        - label: I have searched existing issues and discussions for a similar request.
+          required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      multiple: true
+      options:
+        - salesforce_py.sf (CLI wrapper)
+        - salesforce_py.connect (Connect REST API)
+        - salesforce_py.data360 (Data 360 / CDP)
+        - salesforce_py.models (Einstein Models)
+        - salesforce_py.rest (future)
+        - salesforce_py.bulk (future)
+        - salesforce_py.utils
+        - Tooling / CI / docs
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem statement
+      description: What are you trying to do and why is the current library making it hard?
+      placeholder: e.g. "I need to page through Data 360 activation results without hand-rolling the offset/limit loop."
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: |
+        What would the API look like? A short pseudo-code snippet is worth a thousand words.
+      render: python
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Workarounds you've tried, or other API shapes you rejected and why.
+
+  - type: input
+    id: salesforce_docs
+    attributes:
+      label: Salesforce documentation link
+      description: If this maps to a documented Salesforce API, paste the URL here.
+      placeholder: https://developer.salesforce.com/docs/...
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Willing to contribute?
+      options:
+        - label: I am willing to open a PR for this.

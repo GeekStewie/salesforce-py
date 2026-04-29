@@ -31,9 +31,7 @@ class SitesKnowledgeOperations(ConnectBaseOperations):
         params: dict[str, Any] = {}
         if max_results is not None:
             params["maxResults"] = max_results
-        return await self._get(
-            f"communities/{community_id}/trending-articles", params=params
-        )
+        return await self._get(f"communities/{community_id}/trending-articles", params=params)
 
     async def get_topic_trending_articles(
         self,

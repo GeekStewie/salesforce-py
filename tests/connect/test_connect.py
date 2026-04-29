@@ -7,10 +7,9 @@ from unittest.mock import AsyncMock, MagicMock
 import httpx
 import pytest
 
-from salesforce_py.connect.client import ConnectClient
 from salesforce_py.connect._session import ConnectSession
+from salesforce_py.connect.client import ConnectClient
 from salesforce_py.exceptions import AuthError, SalesforcePyError
-
 
 INSTANCE_URL = "https://test.my.salesforce.com"
 ACCESS_TOKEN = "test_token_abc"
@@ -236,6 +235,86 @@ class TestConnectClientLifecycle:
         assert isinstance(client.chatter, ChatterOperations)
         assert isinstance(client.files, FilesOperations)
         assert isinstance(client.communities, CommunitiesOperations)
+
+    def test_default_timeout_is_120s(self):
+        """Connect client defaults to the shared 120s timeout."""
+        from salesforce_py._retry import DEFAULT_TIMEOUT
+
+        client = ConnectClient(INSTANCE_URL, ACCESS_TOKEN)
+        assert client._session._timeout == DEFAULT_TIMEOUT
+
+
+# ---------------------------------------------------------------------------
+# Retry integration — transient statuses trigger one retry
+# ---------------------------------------------------------------------------
+
+
+class TestConnectRetry:
+    async def test_get_retries_once_on_transient_status(self, monkeypatch):
+        """A 503 on the first call is retried once, then the 200 body is returned."""
+        import salesforce_py._retry as retry_mod
+
+        monkeypatch.setattr(retry_mod, "HTTP_RETRY_DELAY", 0.0)
+
+        body = {"items": []}
+        c = ConnectClient(INSTANCE_URL, ACCESS_TOKEN)
+        await c.open()
+        c._session.get = AsyncMock(side_effect=[_mock_response(503), _mock_response(200, body)])
+
+        result = await c.chatter.get_feed_items()
+
+        assert result == body
+        assert c._session.get.call_count == 2
+        await c.close()
+
+    async def test_get_retries_once_on_420(self, monkeypatch):
+        """Salesforce's 'enhance your calm' 420 is treated as transient."""
+        import salesforce_py._retry as retry_mod
+
+        monkeypatch.setattr(retry_mod, "HTTP_RETRY_DELAY", 0.0)
+
+        body = {"items": []}
+        c = ConnectClient(INSTANCE_URL, ACCESS_TOKEN)
+        await c.open()
+        c._session.get = AsyncMock(side_effect=[_mock_response(420), _mock_response(200, body)])
+
+        result = await c.chatter.get_feed_items()
+
+        assert result == body
+        assert c._session.get.call_count == 2
+        await c.close()
+
+    async def test_final_transient_surfaces_as_salesforcepyerror(self, monkeypatch):
+        """When both attempts return 503, the final response surfaces as SalesforcePyError."""
+        import salesforce_py._retry as retry_mod
+
+        monkeypatch.setattr(retry_mod, "HTTP_RETRY_DELAY", 0.0)
+
+        c = ConnectClient(INSTANCE_URL, ACCESS_TOKEN)
+        await c.open()
+        c._session.get = AsyncMock(side_effect=[_mock_response(503), _mock_response(503)])
+
+        with pytest.raises(SalesforcePyError):
+            await c.chatter.get_feed_items()
+
+        assert c._session.get.call_count == 2
+        await c.close()
+
+    async def test_no_retry_on_401(self, monkeypatch):
+        """401 is not retried — raises AuthError on first attempt."""
+        import salesforce_py._retry as retry_mod
+
+        monkeypatch.setattr(retry_mod, "HTTP_RETRY_DELAY", 0.0)
+
+        c = ConnectClient(INSTANCE_URL, ACCESS_TOKEN)
+        await c.open()
+        c._session.get = AsyncMock(return_value=_mock_response(401))
+
+        with pytest.raises(AuthError):
+            await c.chatter.get_feed_items()
+
+        assert c._session.get.call_count == 1
+        await c.close()
 
 
 # ---------------------------------------------------------------------------

@@ -157,6 +157,50 @@ class TestData360ClientLifecycle:
         assert isinstance(client.segments, SegmentsOperations)
         assert isinstance(client.universal_id_lookup, UniversalIdLookupOperations)
 
+    def test_default_timeout_is_120s(self):
+        from salesforce_py._retry import DEFAULT_TIMEOUT
+
+        client = Data360Client(INSTANCE_URL, ACCESS_TOKEN)
+        assert client._session._timeout == DEFAULT_TIMEOUT
+
+
+# ---------------------------------------------------------------------------
+# Retry integration — transient statuses trigger one retry
+# ---------------------------------------------------------------------------
+
+
+class TestData360Retry:
+    async def test_get_retries_once_on_transient_status(self, monkeypatch):
+        import salesforce_py._retry as retry_mod
+
+        monkeypatch.setattr(retry_mod, "HTTP_RETRY_DELAY", 0.0)
+
+        body = {"totalCount": 0, "items": []}
+        c = Data360Client(INSTANCE_URL, ACCESS_TOKEN)
+        await c.open()
+        c._session.get = AsyncMock(side_effect=[_mock_response(503), _mock_response(200, body)])
+
+        result = await c.activation_targets.get_activation_targets()
+
+        assert result == body
+        assert c._session.get.call_count == 2
+        await c.close()
+
+    async def test_no_retry_on_404(self, monkeypatch):
+        import salesforce_py._retry as retry_mod
+
+        monkeypatch.setattr(retry_mod, "HTTP_RETRY_DELAY", 0.0)
+
+        c = Data360Client(INSTANCE_URL, ACCESS_TOKEN)
+        await c.open()
+        c._session.get = AsyncMock(return_value=_mock_response(404))
+
+        with pytest.raises(SalesforcePyError):
+            await c.activation_targets.get_activation_target("TGT_X")
+
+        assert c._session.get.call_count == 1
+        await c.close()
+
 
 # ---------------------------------------------------------------------------
 # Activation Targets

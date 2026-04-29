@@ -110,9 +110,7 @@ class NotificationsOperations(ConnectBaseOperations):
         params: dict[str, Any] = {}
         if trim_messages is not None:
             params["trimMessages"] = "true" if trim_messages else "false"
-        return await self._get(
-            f"notifications/{notification_id}", params=params
-        )
+        return await self._get(f"notifications/{notification_id}", params=params)
 
     async def mark_notification(
         self,
@@ -137,9 +135,7 @@ class NotificationsOperations(ConnectBaseOperations):
             body["read"] = read
         if seen is not None:
             body["seen"] = seen
-        return await self._patch(
-            f"notifications/{notification_id}", json=body
-        )
+        return await self._patch(f"notifications/{notification_id}", json=body)
 
     async def execute_action(
         self,
@@ -157,9 +153,7 @@ class NotificationsOperations(ConnectBaseOperations):
             Action Result dict.
         """
         notification_id = self._ensure_18(notification_id)
-        return await self._post(
-            f"notifications/{notification_id}/actions/{action_key}"
-        )
+        return await self._post(f"notifications/{notification_id}/actions/{action_key}")
 
     # ------------------------------------------------------------------
     # Status / types

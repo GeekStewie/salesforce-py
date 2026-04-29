@@ -1,0 +1,135 @@
+name: Bug report
+description: Report a reproducible bug in salesforce-py.
+title: "[Bug]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug report. The more detail you provide, the faster we can diagnose and ship a fix.
+
+        **Before you file:** please search [existing issues](https://github.com/geekstewie/salesforce-py/issues) to avoid duplicates.
+
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: Pre-flight checks
+      options:
+        - label: I have searched existing issues and this has not already been reported.
+          required: true
+        - label: I am using the latest released version of `salesforce-py` (or can reproduce on `main`).
+          required: true
+        - label: This is a bug in `salesforce-py` itself — not in the Salesforce CLI (`sf`), the Salesforce platform, or a third-party dependency.
+          required: true
+
+  - type: dropdown
+    id: client
+    attributes:
+      label: Which client is affected?
+      multiple: true
+      options:
+        - salesforce_py.sf (CLI wrapper)
+        - salesforce_py.connect (Connect REST API)
+        - salesforce_py.data360 (Data 360 / CDP)
+        - salesforce_py.models (Einstein Models)
+        - salesforce_py.utils
+        - Other / not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: One-line description of what is going wrong.
+      placeholder: e.g. "ConnectClient.files.upload raises TypeError when content_type is omitted."
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: |
+        A self-contained code snippet that triggers the bug. Please redact tokens, org URLs, and any customer data.
+      render: python
+      placeholder: |
+        import asyncio
+        from salesforce_py.connect import ConnectClient
+
+        async def main():
+            async with ConnectClient(instance_url="...", access_token="...") as c:
+                result = await c.files.upload(...)
+
+        asyncio.run(main())
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+      description: What did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behaviour
+      description: What happened instead? Include the full traceback if an exception was raised.
+      render: shell
+    validations:
+      required: true
+
+  - type: input
+    id: salesforce_py_version
+    attributes:
+      label: salesforce-py version
+      description: Output of `uv pip show salesforce-py | grep Version` or `pip show salesforce-py | grep Version`.
+      placeholder: e.g. 0.1.1
+    validations:
+      required: true
+
+  - type: input
+    id: python_version
+    attributes:
+      label: Python version
+      description: Output of `python --version`.
+      placeholder: e.g. 3.12.6
+    validations:
+      required: true
+
+  - type: input
+    id: sf_cli_version
+    attributes:
+      label: Salesforce CLI (`sf`) version
+      description: Output of `sf --version`. Leave blank if the bug is unrelated to the CLI wrapper.
+      placeholder: e.g. "@salesforce/cli/2.67.5 darwin-arm64 node-v22.9.0"
+
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: e.g. macOS 14.5 (arm64), Ubuntu 22.04, Windows 11
+
+  - type: dropdown
+    id: org_type
+    attributes:
+      label: Salesforce org type
+      description: Only relevant if the bug depends on org configuration.
+      options:
+        - Production / Developer Edition
+        - Sandbox
+        - Scratch org
+        - Data Cloud tenant
+        - Not applicable
+    validations:
+      required: false
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Additional context
+      description: |
+        Anything else that helps — links to Salesforce docs, related issues, screenshots, logs. Remember to redact secrets.

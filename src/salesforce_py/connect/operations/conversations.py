@@ -12,9 +12,7 @@ class ConversationsOperations(ConnectBaseOperations):
     ``/connect/conversation/{id}/entries`` endpoints.
     """
 
-    async def get_bulk_upload_statuses(
-        self, upload_ids: list[str]
-    ) -> dict[str, Any]:
+    async def get_bulk_upload_statuses(self, upload_ids: list[str]) -> dict[str, Any]:
         """Get the statuses of bulk conversation uploads.
 
         Args:
@@ -28,9 +26,7 @@ class ConversationsOperations(ConnectBaseOperations):
             params={"uploadIds": ",".join(upload_ids)},
         )
 
-    async def bulk_upload(
-        self, body: dict[str, Any]
-    ) -> dict[str, Any]:
+    async def bulk_upload(self, body: dict[str, Any]) -> dict[str, Any]:
         """Bulk upload conversations (up to 512 MB).
 
         For large binary uploads, use a multipart/form-data request against
@@ -74,9 +70,7 @@ class ConversationsOperations(ConnectBaseOperations):
             params["recordLimit"] = record_limit
         if start_timestamp is not None:
             params["startTimestamp"] = start_timestamp
-        return await self._get(
-            f"conversation/{conversation_identifier}/entries", params=params
-        )
+        return await self._get(f"conversation/{conversation_identifier}/entries", params=params)
 
     async def update_entries(
         self,
@@ -95,6 +89,4 @@ class ConversationsOperations(ConnectBaseOperations):
             Conversation Entries Update dict.
         """
         payload = {"conversationEntriesUpdates": conversation_entries_updates}
-        return await self._patch(
-            f"conversation/{conversation_identifier}/entries", json=payload
-        )
+        return await self._patch(f"conversation/{conversation_identifier}/entries", json=payload)

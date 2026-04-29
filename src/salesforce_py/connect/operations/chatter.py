@@ -175,9 +175,7 @@ class ChatterOperations(ConnectBaseOperations):
         params: dict[str, Any] = {"pageSize": page_size}
         if page_token:
             params["pageToken"] = page_token
-        return await self._get(
-            f"chatter/feeds/files/{user_id}/feed-elements", params=params
-        )
+        return await self._get(f"chatter/feeds/files/{user_id}/feed-elements", params=params)
 
     async def get_news_feed_elements(
         self,
@@ -200,9 +198,7 @@ class ChatterOperations(ConnectBaseOperations):
         params: dict[str, Any] = {"pageSize": page_size}
         if page_token:
             params["pageToken"] = page_token
-        return await self._get(
-            f"chatter/feeds/news/{user_id}/feed-elements", params=params
-        )
+        return await self._get(f"chatter/feeds/news/{user_id}/feed-elements", params=params)
 
     async def get_record_feed_elements(
         self,
@@ -225,9 +221,7 @@ class ChatterOperations(ConnectBaseOperations):
         params: dict[str, Any] = {"pageSize": page_size}
         if page_token:
             params["pageToken"] = page_token
-        return await self._get(
-            f"chatter/feeds/record/{record_id}/feed-elements", params=params
-        )
+        return await self._get(f"chatter/feeds/record/{record_id}/feed-elements", params=params)
 
     async def get_user_profile_feed_elements(
         self,
@@ -250,6 +244,4 @@ class ChatterOperations(ConnectBaseOperations):
         params: dict[str, Any] = {"pageSize": page_size}
         if page_token:
             params["pageToken"] = page_token
-        return await self._get(
-            f"chatter/feeds/user-profile/{user_id}/feed-elements", params=params
-        )
+        return await self._get(f"chatter/feeds/user-profile/{user_id}/feed-elements", params=params)

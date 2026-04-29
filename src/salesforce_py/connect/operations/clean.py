@@ -22,9 +22,7 @@ class CleanOperations(ConnectBaseOperations):
         """
         return await self._get("clean/data-services")
 
-    async def get_data_service_metrics(
-        self, data_service_id: str
-    ) -> dict[str, Any]:
+    async def get_data_service_metrics(self, data_service_id: str) -> dict[str, Any]:
         """Get metrics for a data service.
 
         Args:
@@ -33,9 +31,7 @@ class CleanOperations(ConnectBaseOperations):
         Returns:
             Clean Rule Data Service Metrics Collection dict.
         """
-        return await self._get(
-            f"clean/data-services/{data_service_id}/metrics"
-        )
+        return await self._get(f"clean/data-services/{data_service_id}/metrics")
 
     async def get_rule_statuses(self, record_id: str) -> dict[str, Any]:
         """Get active data integration rule statuses for a record.

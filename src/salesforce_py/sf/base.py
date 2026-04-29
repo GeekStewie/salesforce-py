@@ -7,8 +7,9 @@ from pathlib import Path
 from typing import Any
 
 from salesforce_py._defaults import DEFAULT_API_VERSION
-from salesforce_py.sf.org import SFOrg
+from salesforce_py._retry import DEFAULT_TIMEOUT, retry_sync_cli
 from salesforce_py.exceptions import CLIError, SalesforcePyError
+from salesforce_py.sf.org import SFOrg
 
 _log = logging.getLogger(__name__)
 
@@ -102,7 +103,7 @@ class SFBaseOperations:
         self,
         args: list[str],
         *,
-        timeout: int = 120,
+        timeout: int = int(DEFAULT_TIMEOUT),
         include_target_org: bool = True,
         include_api_version: bool = True,
         include_json: bool = True,
@@ -112,9 +113,14 @@ class SFBaseOperations:
         Ensures the org is connected before running, then dispatches via
         ``subprocess.run`` with ``shell=True`` and the org's isolated env.
 
+        Retries once after :data:`salesforce_py._retry.CLI_RETRY_DELAY`
+        seconds when the subprocess call times out. Does **not** retry on
+        ``CLIError`` — a non-zero exit code is treated as deterministic.
+
         Args:
             args: Sub-command parts passed to :meth:`_build_cmd`.
-            timeout: Subprocess timeout in seconds (default 120).
+            timeout: Subprocess timeout in seconds. Defaults to
+                :data:`salesforce_py._retry.DEFAULT_TIMEOUT` (120).
             include_target_org: Forward to :meth:`_build_cmd`.
             include_api_version: Forward to :meth:`_build_cmd`.
             include_json: Forward to :meth:`_build_cmd`. Set False for commands
@@ -138,8 +144,8 @@ class SFBaseOperations:
         cmd_str = " ".join(cmd)
         env = self._org.env()
 
-        try:
-            proc = subprocess.run(
+        def _invoke() -> subprocess.CompletedProcess[str]:
+            return subprocess.run(
                 cmd_str,
                 shell=True,
                 capture_output=True,
@@ -147,6 +153,9 @@ class SFBaseOperations:
                 timeout=timeout,
                 env=env,
             )
+
+        try:
+            proc = retry_sync_cli(_invoke)
         except subprocess.TimeoutExpired as exc:
             raise SalesforcePyError(
                 f"SF CLI command timed out after {timeout}s: {{'cmd': '{cmd_str}'}}"
@@ -183,7 +192,8 @@ class SFBaseOperations:
             payload = json.loads(raw_output)
         except json.JSONDecodeError as exc:
             raise SalesforcePyError(
-                f"SF CLI returned non-JSON output: {{'cmd': '{cmd_str}', 'output': '{raw_output[:500]}'}}"
+                "SF CLI returned non-JSON output: "
+                f"{{'cmd': '{cmd_str}', 'output': '{raw_output[:500]}'}}"
             ) from exc
 
         for warning in payload.get("warnings", []):
@@ -197,7 +207,7 @@ class SFBaseOperations:
         args: list[str],
         *,
         label: str = "Running",
-        timeout: int = 120,
+        timeout: int = int(DEFAULT_TIMEOUT),
         include_target_org: bool = True,
         include_api_version: bool = True,
         include_json: bool = True,

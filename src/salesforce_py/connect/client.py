@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from salesforce_py._retry import DEFAULT_TIMEOUT
 from salesforce_py.connect._session import _DEFAULT_API_VERSION, ConnectSession
 from salesforce_py.connect.operations.action_links import ActionLinksOperations
 from salesforce_py.connect.operations.activity_reminders import (
@@ -168,7 +169,8 @@ class ConnectClient:
     Args:
         instance_url: Org instance URL, e.g. ``"https://myorg.my.salesforce.com"``.
         access_token: OAuth bearer token for the org.
-        api_version: Salesforce API version string. Defaults to :data:`salesforce_py.DEFAULT_API_VERSION`.
+        api_version: Salesforce API version string. Defaults to
+            :data:`salesforce_py.DEFAULT_API_VERSION`.
         timeout: Default HTTP request timeout in seconds.
         http2: Negotiate HTTP/2 when the server supports it (falls back to HTTP/1.1).
             Defaults to ``True`` — some Salesforce edges are HTTP/2-enabled and
@@ -180,7 +182,7 @@ class ConnectClient:
         instance_url: str,
         access_token: str,
         api_version: str = _DEFAULT_API_VERSION,
-        timeout: float = 30.0,
+        timeout: float = DEFAULT_TIMEOUT,
         http2: bool = True,
     ) -> None:
         self._session = ConnectSession(

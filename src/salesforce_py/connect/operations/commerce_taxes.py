@@ -17,9 +17,7 @@ class CommerceTaxesOperations(ConnectBaseOperations):
     def _base(self, webstore_id: str) -> str:
         return f"commerce/webstores/{self._ensure_18(webstore_id)}"
 
-    async def calculate_taxes(
-        self, webstore_id: str, body: dict[str, Any]
-    ) -> dict[str, Any]:
+    async def calculate_taxes(self, webstore_id: str, body: dict[str, Any]) -> dict[str, Any]:
         """Calculate taxes for a Commerce webstore."""
         return await self._post(
             f"{self._base(webstore_id)}/taxes/actions/calculate-taxes",

@@ -431,9 +431,7 @@ class FeedsOperations(ConnectBaseOperations):
             Favorite Collection dict.
         """
         user_id = self._ensure_18(user_id)
-        return await self._get(
-            f"{self._prefix(community_id)}chatter/feeds/favorites/{user_id}"
-        )
+        return await self._get(f"{self._prefix(community_id)}chatter/feeds/favorites/{user_id}")
 
     async def get_favorite_feed(
         self,

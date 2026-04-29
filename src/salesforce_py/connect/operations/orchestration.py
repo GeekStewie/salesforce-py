@@ -31,14 +31,10 @@ class OrchestrationOperations(ConnectBaseOperations):
         """
         params: dict[str, Any] = {}
         if related_orchestration_id is not None:
-            params["relatedOrchestrationId"] = self._ensure_18(
-                related_orchestration_id
-            )
+            params["relatedOrchestrationId"] = self._ensure_18(related_orchestration_id)
         if related_record_id is not None:
             params["relatedRecordId"] = self._ensure_18(related_record_id)
-        return await self._get(
-            "interaction/orchestration/instances", params=params
-        )
+        return await self._get("interaction/orchestration/instances", params=params)
 
     async def get_instance_detail(self, instance_id: str) -> dict[str, Any]:
         """Get orchestration instance details (v63.0+).

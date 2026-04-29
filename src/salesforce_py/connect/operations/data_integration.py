@@ -22,9 +22,7 @@ class DataIntegrationOperations(ConnectBaseOperations):
         """
         return await self._get("data-integration/licensed-objects")
 
-    async def get_contract_credit(
-        self, external_object_name: str
-    ) -> dict[str, Any]:
+    async def get_contract_credit(self, external_object_name: str) -> dict[str, Any]:
         """Get credit details for a contract.
 
         Args:

@@ -79,9 +79,7 @@ class GroupsOperations(ConnectBaseOperations):
         Returns:
             Created group detail dict.
         """
-        return await self._post(
-            f"{self._prefix(community_id)}chatter/groups", json=group
-        )
+        return await self._post(f"{self._prefix(community_id)}chatter/groups", json=group)
 
     async def get_groups_batch(
         self,
@@ -107,9 +105,7 @@ class GroupsOperations(ConnectBaseOperations):
     # Single group  /chatter/groups/{groupId}
     # ------------------------------------------------------------------
 
-    async def get_group(
-        self, group_id: str, *, community_id: str | None = None
-    ) -> dict[str, Any]:
+    async def get_group(self, group_id: str, *, community_id: str | None = None) -> dict[str, Any]:
         """Get information about a group.
 
         Args:
@@ -120,9 +116,7 @@ class GroupsOperations(ConnectBaseOperations):
             Group detail dict.
         """
         group_id = self._ensure_18(group_id)
-        return await self._get(
-            f"{self._prefix(community_id)}chatter/groups/{group_id}"
-        )
+        return await self._get(f"{self._prefix(community_id)}chatter/groups/{group_id}")
 
     async def update_group(
         self,
@@ -159,9 +153,7 @@ class GroupsOperations(ConnectBaseOperations):
             Empty dict on success.
         """
         group_id = self._ensure_18(group_id)
-        return await self._delete(
-            f"{self._prefix(community_id)}chatter/groups/{group_id}"
-        )
+        return await self._delete(f"{self._prefix(community_id)}chatter/groups/{group_id}")
 
     # ------------------------------------------------------------------
     # Members  /chatter/groups/{groupId}/members
@@ -387,9 +379,7 @@ class GroupsOperations(ConnectBaseOperations):
             Group Record Collection dict.
         """
         group_id = self._ensure_18(group_id)
-        return await self._get(
-            f"{self._prefix(community_id)}chatter/groups/{group_id}/records"
-        )
+        return await self._get(f"{self._prefix(community_id)}chatter/groups/{group_id}/records")
 
     async def add_group_record(
         self,
@@ -449,9 +439,7 @@ class GroupsOperations(ConnectBaseOperations):
             Topic Collection dict.
         """
         group_id = self._ensure_18(group_id)
-        return await self._get(
-            f"{self._prefix(community_id)}chatter/groups/{group_id}/topics"
-        )
+        return await self._get(f"{self._prefix(community_id)}chatter/groups/{group_id}/topics")
 
     async def get_group_my_settings(
         self, group_id: str, *, community_id: str | None = None
@@ -466,9 +454,7 @@ class GroupsOperations(ConnectBaseOperations):
             Group Chatter Settings dict.
         """
         group_id = self._ensure_18(group_id)
-        return await self._get(
-            f"{self._prefix(community_id)}chatter/groups/{group_id}/my-settings"
-        )
+        return await self._get(f"{self._prefix(community_id)}chatter/groups/{group_id}/my-settings")
 
     async def update_group_my_settings(
         self,
@@ -561,9 +547,7 @@ class GroupsOperations(ConnectBaseOperations):
             Photo metadata dict.
         """
         group_id = self._ensure_18(group_id)
-        return await self._get(
-            f"{self._prefix(community_id)}chatter/groups/{group_id}/photo"
-        )
+        return await self._get(f"{self._prefix(community_id)}chatter/groups/{group_id}/photo")
 
     async def set_group_photo(
         self,
@@ -615,9 +599,7 @@ class GroupsOperations(ConnectBaseOperations):
             Empty dict on success.
         """
         group_id = self._ensure_18(group_id)
-        return await self._delete(
-            f"{self._prefix(community_id)}chatter/groups/{group_id}/photo"
-        )
+        return await self._delete(f"{self._prefix(community_id)}chatter/groups/{group_id}/photo")
 
     async def get_group_banner_photo(
         self, group_id: str, *, community_id: str | None = None

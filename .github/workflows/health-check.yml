@@ -1,0 +1,47 @@
+name: Health Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: health-check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  health-check:
+    name: Lint, type-check, security scan, tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install project (dev + all extras)
+        run: uv sync --extra dev --extra all
+
+      - name: Ruff lint
+        run: uv run ruff check src/ tests/
+
+      - name: Ruff format check
+        run: uv run ruff format --check src/ tests/
+
+      - name: Type check (ty)
+        run: uv run ty check src/
+
+      - name: Security scan (bandit)
+        run: uv run bandit -r src/ -c pyproject.toml
+
+      - name: Run tests (pytest)
+        run: uv run pytest

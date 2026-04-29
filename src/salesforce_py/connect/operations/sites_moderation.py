@@ -148,9 +148,7 @@ class SitesModerationOperations(ConnectBaseOperations):
             params["pageSize"] = page_size
         if q is not None:
             params["q"] = q
-        return await self._get(
-            f"communities/{community_id}/files/moderation", params=params
-        )
+        return await self._get(f"communities/{community_id}/files/moderation", params=params)
 
     # ------------------------------------------------------------------
     # User audit stats

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions & general discussion
+    url: https://github.com/geekstewie/salesforce-py/discussions
+    about: Ask a question or start a discussion. Please use Discussions instead of filing an issue.
+  - name: Salesforce CLI (`sf`) bugs
+    url: https://github.com/forcedotcom/cli/issues
+    about: This project wraps `sf` — report CLI-level bugs upstream to the Salesforce CLI repo.

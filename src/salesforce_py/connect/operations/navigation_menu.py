@@ -47,9 +47,7 @@ class NavigationMenuOperations(ConnectBaseOperations):
         if navigation_link_set_id is not None:
             params["navigationLinkSetId"] = navigation_link_set_id
         if navigation_link_set_developer_name is not None:
-            params["navigationLinkSetDeveloperName"] = (
-                navigation_link_set_developer_name
-            )
+            params["navigationLinkSetDeveloperName"] = navigation_link_set_developer_name
         if publish_status is not None:
             params["publishStatus"] = publish_status
         if add_home_menu_item is not None:

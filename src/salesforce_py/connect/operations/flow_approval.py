@@ -31,6 +31,4 @@ class FlowApprovalOperations(ConnectBaseOperations):
             params["processNames"] = ",".join(process_names)
         if related_record_id is not None:
             params["relatedRecordId"] = self._ensure_18(related_record_id)
-        return await self._get(
-            "interaction/flow-approval-process/status", params=params
-        )
+        return await self._get("interaction/flow-approval-process/status", params=params)

@@ -22,6 +22,7 @@ def _require_ruamel() -> None:
             "Install it with: pip install 'salesforce-py[code-analyzer]'"
         )
 
+
 from salesforce_py.exceptions import SalesforcePyError
 
 _log = logging.getLogger(__name__)
@@ -171,18 +172,14 @@ class SFCodeAnalyzerManager:
                 invalid, or the install command fails.
         """
         if shutil.which("sf") is None:
-            raise SalesforcePyError(
-                "SF CLI not found on PATH: {'hint': 'Install SF CLI first'}"
-            )
+            raise SalesforcePyError("SF CLI not found on PATH: {'hint': 'Install SF CLI first'}")
 
         if version is not None and not _VERSION_RE.match(version):
             raise SalesforcePyError(
                 f"Invalid Code Analyzer version string: {{'version': '{version}'}}"
             )
 
-        package = (
-            f"{_CODE_ANALYZER_PLUGIN}@{version}" if version else _CODE_ANALYZER_PLUGIN
-        )
+        package = f"{_CODE_ANALYZER_PLUGIN}@{version}" if version else _CODE_ANALYZER_PLUGIN
         label = f"version {version}" if version else "latest"
         _log.info(f"Installing Code Analyzer plugin ({label})...")
         try:
@@ -192,13 +189,12 @@ class SFCodeAnalyzerManager:
                 timeout=timeout,
             )
         except subprocess.TimeoutExpired as exc:
-            raise SalesforcePyError(
-                f"Code Analyzer install timed out after {timeout}s"
-            ) from exc
+            raise SalesforcePyError(f"Code Analyzer install timed out after {timeout}s") from exc
 
         if proc.returncode != 0:
             raise SalesforcePyError(
-                f"Code Analyzer plugin installation failed: {{'exit_code': {proc.returncode}, 'package': '{package}'}}"
+                "Code Analyzer plugin installation failed: "
+                f"{{'exit_code': {proc.returncode}, 'package': '{package}'}}"
             )
         _log.info(f"Code Analyzer plugin {label} installed")
 
@@ -234,9 +230,7 @@ class SFCodeAnalyzerManager:
             raise SalesforcePyError("SF CLI not found on PATH")
 
         if not self.is_installed():
-            _log.warning(
-                "Code Analyzer plugin is not installed — nothing to uninstall"
-            )
+            _log.warning("Code Analyzer plugin is not installed — nothing to uninstall")
             return
 
         _log.info("Uninstalling Code Analyzer plugin...")
@@ -247,9 +241,7 @@ class SFCodeAnalyzerManager:
                 timeout=timeout,
             )
         except subprocess.TimeoutExpired as exc:
-            raise SalesforcePyError(
-                f"Code Analyzer uninstall timed out after {timeout}s"
-            ) from exc
+            raise SalesforcePyError(f"Code Analyzer uninstall timed out after {timeout}s") from exc
 
         if proc.returncode != 0:
             raise SalesforcePyError(
@@ -274,7 +266,8 @@ class SFCodeAnalyzerManager:
         unknown = [e for e in engines if e not in _VALID_ENGINES]
         if unknown:
             raise SalesforcePyError(
-                f"Unknown Code Analyzer engine(s): {{'unknown': {unknown}, 'valid': {sorted(_VALID_ENGINES)}}}"
+                "Unknown Code Analyzer engine(s): "
+                f"{{'unknown': {unknown}, 'valid': {sorted(_VALID_ENGINES)}}}"
             )
 
     # ------------------------------------------------------------------
@@ -374,7 +367,8 @@ class SFCodeAnalyzerManager:
 
         if target.exists() and not overwrite:
             raise SalesforcePyError(
-                f"Config file already exists: {{'path': '{target}', 'hint': 'Pass overwrite=True to replace it'}}"
+                "Config file already exists: "
+                f"{{'path': '{target}', 'hint': 'Pass overwrite=True to replace it'}}"
             )
 
         if disabled_engines:
@@ -484,11 +478,7 @@ class SFCodeAnalyzerManager:
                 current_files.append(pattern)
         for pattern in ignores_files_remove or []:
             current_files = [f for f in current_files if f != pattern]
-        if (
-            current_files
-            or ignores_files_add is not None
-            or ignores_files_remove is not None
-        ):
+        if current_files or ignores_files_add is not None or ignores_files_remove is not None:
             data.setdefault("ignores", {})
             if isinstance(data["ignores"], dict):
                 data["ignores"]["files"] = current_files
@@ -496,9 +486,7 @@ class SFCodeAnalyzerManager:
         # rules — deep merge
         if rules:
             _raw_rules = data.get("rules") or {}
-            existing_rules: dict[str, Any] = (
-                _raw_rules if isinstance(_raw_rules, dict) else {}
-            )
+            existing_rules: dict[str, Any] = _raw_rules if isinstance(_raw_rules, dict) else {}
             for engine, rule_map in rules.items():
                 engine_rules = existing_rules.setdefault(engine, {})
                 if not isinstance(engine_rules, dict):
@@ -514,9 +502,7 @@ class SFCodeAnalyzerManager:
 
         # engines — deep merge then apply disable/enable toggles
         _raw_engines = data.get("engines") or {}
-        merged_engines: dict[str, Any] = (
-            _raw_engines if isinstance(_raw_engines, dict) else {}
-        )
+        merged_engines: dict[str, Any] = _raw_engines if isinstance(_raw_engines, dict) else {}
 
         if engines:
             for engine, props in engines.items():
@@ -581,16 +567,15 @@ class SFCodeAnalyzerManager:
 
         if target is None or not target.exists():
             if not no_prompt:
-                _log.warning(
-                    "No Code Analyzer config file found — nothing to delete"
-                )
+                _log.warning("No Code Analyzer config file found — nothing to delete")
             return False
 
         try:
             target.unlink()
         except OSError as exc:
             raise SalesforcePyError(
-                f"Failed to delete Code Analyzer config file: {{'path': '{target}', 'error': '{exc}'}}"
+                "Failed to delete Code Analyzer config file: "
+                f"{{'path': '{target}', 'error': '{exc}'}}"
             ) from exc
 
         _log.info(f"Deleted {target}")

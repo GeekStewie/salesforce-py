@@ -30,9 +30,7 @@ class NetworkDataCategoryOperations(ConnectBaseOperations):
             Network Data Category Tree dict.
         """
         community_id = self._ensure_18(community_id)
-        return await self._get(
-            f"communities/{community_id}/data-category/network-data-category"
-        )
+        return await self._get(f"communities/{community_id}/data-category/network-data-category")
 
     async def replace_tree(
         self,

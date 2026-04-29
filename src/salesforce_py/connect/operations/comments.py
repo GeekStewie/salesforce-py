@@ -43,9 +43,7 @@ class CommentsOperations(ConnectBaseOperations):
             Comment dict.
         """
         comment_id = self._ensure_18(comment_id)
-        return await self._get(
-            f"{self._prefix(community_id)}chatter/comments/{comment_id}"
-        )
+        return await self._get(f"{self._prefix(community_id)}chatter/comments/{comment_id}")
 
     async def edit_comment(
         self,
@@ -87,9 +85,7 @@ class CommentsOperations(ConnectBaseOperations):
             Empty dict on success.
         """
         comment_id = self._ensure_18(comment_id)
-        return await self._delete(
-            f"{self._prefix(community_id)}chatter/comments/{comment_id}"
-        )
+        return await self._delete(f"{self._prefix(community_id)}chatter/comments/{comment_id}")
 
     async def get_comments_batch(
         self,
@@ -156,9 +152,7 @@ class CommentsOperations(ConnectBaseOperations):
             Like dict.
         """
         comment_id = self._ensure_18(comment_id)
-        return await self._post(
-            f"{self._prefix(community_id)}chatter/comments/{comment_id}/likes"
-        )
+        return await self._post(f"{self._prefix(community_id)}chatter/comments/{comment_id}/likes")
 
     # ------------------------------------------------------------------
     # Up/down votes  /capabilities/up-down-vote

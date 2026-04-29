@@ -1,0 +1,27 @@
+name: Documentation issue
+description: Report a gap, inaccuracy, or improvement opportunity in the docs.
+title: "[Docs]: "
+labels: ["documentation", "triage"]
+body:
+  - type: textarea
+    id: location
+    attributes:
+      label: Where is the problem?
+      description: |
+        Link to the specific file, line, README section, or docstring. For in-repo docs paste a permalink.
+      placeholder: e.g. src/salesforce_py/connect/README.md — "Commerce" section
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What's wrong or missing?
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested fix
+      description: Optional — a concrete wording or structural change you would like to see.

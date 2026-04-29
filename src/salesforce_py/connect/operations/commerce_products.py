@@ -43,9 +43,7 @@ class CommerceProductsOperations(ConnectBaseOperations):
             params["effectiveAccountId"] = self._ensure_18(effective_account_id)
         if fields is not None:
             params["fields"] = ",".join(fields)
-        return await self._get(
-            f"{self._base(webstore_id)}/products", params=params
-        )
+        return await self._get(f"{self._base(webstore_id)}/products", params=params)
 
     async def get_product(
         self,
@@ -62,27 +60,17 @@ class CommerceProductsOperations(ConnectBaseOperations):
             params["effectiveAccountId"] = self._ensure_18(effective_account_id)
         if fields is not None:
             params["fields"] = ",".join(fields)
-        return await self._get(
-            f"{self._base(webstore_id)}/products/{product_id}", params=params
-        )
+        return await self._get(f"{self._base(webstore_id)}/products/{product_id}", params=params)
 
-    async def list_featured_products(
-        self, webstore_id: str, product_id: str
-    ) -> dict[str, Any]:
+    async def list_featured_products(self, webstore_id: str, product_id: str) -> dict[str, Any]:
         """Retrieve a collection of featured products for a specific product."""
         product_id = self._ensure_18(product_id)
-        return await self._get(
-            f"{self._base(webstore_id)}/products/{product_id}/featured-products"
-        )
+        return await self._get(f"{self._base(webstore_id)}/products/{product_id}/featured-products")
 
-    async def list_child_products(
-        self, webstore_id: str, product_id: str
-    ) -> dict[str, Any]:
+    async def list_child_products(self, webstore_id: str, product_id: str) -> dict[str, Any]:
         """Get child products related to a parent product."""
         product_id = self._ensure_18(product_id)
-        return await self._get(
-            f"{self._base(webstore_id)}/products/{product_id}/children"
-        )
+        return await self._get(f"{self._base(webstore_id)}/products/{product_id}/children")
 
     # Product categories
 
@@ -105,9 +93,7 @@ class CommerceProductsOperations(ConnectBaseOperations):
         """
         params: dict[str, Any] = {}
         if parent_product_category_id is not None:
-            params["parentProductCategoryId"] = self._ensure_18(
-                parent_product_category_id
-            )
+            params["parentProductCategoryId"] = self._ensure_18(parent_product_category_id)
         if effective_account_id is not None:
             params["effectiveAccountId"] = self._ensure_18(effective_account_id)
         return await self._get(
@@ -121,8 +107,7 @@ class CommerceProductsOperations(ConnectBaseOperations):
         """Get a product category."""
         product_category_id = self._ensure_18(product_category_id)
         return await self._get(
-            f"{self._base(webstore_id)}"
-            f"/product-categories/{product_category_id}"
+            f"{self._base(webstore_id)}/product-categories/{product_category_id}"
         )
 
     async def get_product_category_path(
@@ -145,20 +130,14 @@ class CommerceProductsOperations(ConnectBaseOperations):
         """Retrieve product category menu items."""
         params: dict[str, Any] = {}
         if parent_product_category_id is not None:
-            params["parentProductCategoryId"] = self._ensure_18(
-                parent_product_category_id
-            )
+            params["parentProductCategoryId"] = self._ensure_18(parent_product_category_id)
         if depth is not None:
             params["depth"] = depth
-        return await self._get(
-            f"{self._base(webstore_id)}/category-menu-items", params=params
-        )
+        return await self._get(f"{self._base(webstore_id)}/category-menu-items", params=params)
 
     # Search
 
-    async def search_products(
-        self, webstore_id: str, body: dict[str, Any]
-    ) -> dict[str, Any]:
+    async def search_products(self, webstore_id: str, body: dict[str, Any]) -> dict[str, Any]:
         """Search products (POST ``/search/product-search``).
 
         Args:
@@ -168,9 +147,7 @@ class CommerceProductsOperations(ConnectBaseOperations):
         Returns:
             Product Search Results dict.
         """
-        return await self._post(
-            f"{self._base(webstore_id)}/search/product-search", json=body
-        )
+        return await self._post(f"{self._base(webstore_id)}/search/product-search", json=body)
 
     async def search_products_by_term(
         self,
@@ -191,9 +168,7 @@ class CommerceProductsOperations(ConnectBaseOperations):
             params["page"] = page
         if page_size is not None:
             params["pageSize"] = page_size
-        return await self._get(
-            f"{self._base(webstore_id)}/search/products", params=params
-        )
+        return await self._get(f"{self._base(webstore_id)}/search/products", params=params)
 
     async def get_sort_rules(self, webstore_id: str) -> dict[str, Any]:
         """Get sort rules for the live index."""
@@ -210,6 +185,4 @@ class CommerceProductsOperations(ConnectBaseOperations):
         params: dict[str, Any] = {"searchTerm": search_term}
         if max_results is not None:
             params["maxResults"] = max_results
-        return await self._get(
-            f"{self._base(webstore_id)}/search/suggestions", params=params
-        )
+        return await self._get(f"{self._base(webstore_id)}/search/suggestions", params=params)

@@ -19,6 +19,4 @@ class QuipOperations(ConnectBaseOperations):
         Returns:
             Quip Related Records dict.
         """
-        return await self._get(
-            f"quip/related-records/{quip_document_id}"
-        )
+        return await self._get(f"quip/related-records/{quip_document_id}")

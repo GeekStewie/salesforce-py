@@ -47,13 +47,9 @@ class PersonalizationEngagementSignalsOperations(ConnectBaseOperations):
             params["limit"] = limit
         if offset is not None:
             params["offset"] = offset
-        return await self._get(
-            "personalization/engagement-signals", params=params
-        )
+        return await self._get("personalization/engagement-signals", params=params)
 
-    async def create_engagement_signal(
-        self, body: dict[str, Any]
-    ) -> dict[str, Any]:
+    async def create_engagement_signal(self, body: dict[str, Any]) -> dict[str, Any]:
         """Create an engagement signal (v63.0+).
 
         Args:
@@ -62,13 +58,9 @@ class PersonalizationEngagementSignalsOperations(ConnectBaseOperations):
         Returns:
             Engagement Signal dict.
         """
-        return await self._post(
-            "personalization/engagement-signals", json=body
-        )
+        return await self._post("personalization/engagement-signals", json=body)
 
-    async def get_engagement_signal(
-        self, id_or_name: str
-    ) -> dict[str, Any]:
+    async def get_engagement_signal(self, id_or_name: str) -> dict[str, Any]:
         """Get an engagement signal (v63.0+).
 
         Args:
@@ -77,13 +69,9 @@ class PersonalizationEngagementSignalsOperations(ConnectBaseOperations):
         Returns:
             Engagement Signal dict.
         """
-        return await self._get(
-            f"personalization/engagement-signals/{id_or_name}"
-        )
+        return await self._get(f"personalization/engagement-signals/{id_or_name}")
 
-    async def delete_engagement_signal(
-        self, id_or_name: str
-    ) -> dict[str, Any]:
+    async def delete_engagement_signal(self, id_or_name: str) -> dict[str, Any]:
         """Delete an engagement signal (v63.0+).
 
         Args:
@@ -92,9 +80,7 @@ class PersonalizationEngagementSignalsOperations(ConnectBaseOperations):
         Returns:
             Empty dict on success.
         """
-        return await self._delete(
-            f"personalization/engagement-signals/{id_or_name}"
-        )
+        return await self._delete(f"personalization/engagement-signals/{id_or_name}")
 
     # ------------------------------------------------------------------
     # Metrics  /personalization/engagement-signals/{id}/metrics
@@ -130,17 +116,14 @@ class PersonalizationEngagementSignalsOperations(ConnectBaseOperations):
             Empty dict on success.
         """
         return await self._delete(
-            f"personalization/engagement-signals/{signal_id_or_name}"
-            f"/metrics/{metric_id_or_name}"
+            f"personalization/engagement-signals/{signal_id_or_name}/metrics/{metric_id_or_name}"
         )
 
     # ------------------------------------------------------------------
     # Compound metrics  /personalization/compound-metrics
     # ------------------------------------------------------------------
 
-    async def create_compound_metric(
-        self, body: dict[str, Any]
-    ) -> dict[str, Any]:
+    async def create_compound_metric(self, body: dict[str, Any]) -> dict[str, Any]:
         """Create a compound metric (v64.0+).
 
         Args:
@@ -149,13 +132,9 @@ class PersonalizationEngagementSignalsOperations(ConnectBaseOperations):
         Returns:
             Engagement Signal Compound Metric dict.
         """
-        return await self._post(
-            "personalization/compound-metrics", json=body
-        )
+        return await self._post("personalization/compound-metrics", json=body)
 
-    async def get_compound_metric(
-        self, id_or_name: str
-    ) -> dict[str, Any]:
+    async def get_compound_metric(self, id_or_name: str) -> dict[str, Any]:
         """Get a compound metric (v64.0+).
 
         Args:
@@ -164,13 +143,9 @@ class PersonalizationEngagementSignalsOperations(ConnectBaseOperations):
         Returns:
             Engagement Signal Compound Metric dict.
         """
-        return await self._get(
-            f"personalization/compound-metrics/{id_or_name}"
-        )
+        return await self._get(f"personalization/compound-metrics/{id_or_name}")
 
-    async def delete_compound_metric(
-        self, id_or_name: str
-    ) -> dict[str, Any]:
+    async def delete_compound_metric(self, id_or_name: str) -> dict[str, Any]:
         """Delete a compound metric (v64.0+).
 
         Args:
@@ -179,6 +154,4 @@ class PersonalizationEngagementSignalsOperations(ConnectBaseOperations):
         Returns:
             Empty dict on success.
         """
-        return await self._delete(
-            f"personalization/compound-metrics/{id_or_name}"
-        )
+        return await self._delete(f"personalization/compound-metrics/{id_or_name}")
