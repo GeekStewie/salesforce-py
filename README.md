@@ -142,22 +142,56 @@ task.agent.test_run(api_name="MyAgentTest", wait=5)
 
 `salesforce_py.connect` is a fully async client for the Salesforce Connect REST API. It covers Chatter, Files, Communities, Commerce, Einstein, Managed Topics, Named Credentials, Search, and most other endpoints served under `/services/data/vXX.X/connect/` (and sibling namespaces). HTTP/2 is negotiated by default, with transparent fallback to HTTP/1.1.
 
+**Option 1 — environment variables (recommended for CI/CD):**
+
 ```python
 import asyncio
 from salesforce_py.connect import ConnectClient
 
 async def main():
-    # From environment variables (recommended for CI/CD):
     async with await ConnectClient.from_env() as client:
         me = await client.users.get_user("me")
 
-    # From SF CLI session:
+asyncio.run(main())
+```
+
+**Option 2 — SF CLI session (interactive / dev machines):**
+
+```python
+import asyncio
+from salesforce_py.connect import ConnectClient
+
+async def main():
     async with await ConnectClient.from_env("my-org-alias") as client:
         await client.chatter.post_feed_item(body="Shipped.", subject_id="me")
 
-    # Direct token:
+asyncio.run(main())
+```
+
+**Option 3 — SF CLI org object:**
+
+```python
+import asyncio
+from salesforce_py.connect import ConnectClient
+from salesforce_py.sf import SFOrgTask
+
+async def main():
+    task = SFOrgTask("my-org-alias")
+    async with ConnectClient.from_org(task._org) as client:
+        me = await client.users.get_user("me")
+
+asyncio.run(main())
+```
+
+**Option 4 — direct token:**
+
+```python
+import asyncio
+from salesforce_py.connect import ConnectClient
+
+async def main():
     async with ConnectClient(instance_url="...", access_token="...") as client:
-        ...
+        me = await client.users.get_user("me")
 
 asyncio.run(main())
 ```
@@ -182,25 +216,59 @@ See [src/salesforce_py/connect/README.md](src/salesforce_py/connect/README.md) f
 
 `salesforce_py.data360` is a fully async client for the Salesforce Data 360 Connect REST API — the endpoint family under `/services/data/vXX.X/ssot/` (formerly Data Cloud / CDP). HTTP/2 is negotiated by default.
 
+**Option 1 — environment variables (recommended for CI/CD):**
+
 ```python
 import asyncio
 from salesforce_py.data360 import Data360Client
 
 async def main():
-    # From environment variables (recommended for CI/CD):
     async with await Data360Client.from_env() as client:
         segments = await client.segments.get_segments()
 
-    # From SF CLI session:
+asyncio.run(main())
+```
+
+**Option 2 — SF CLI session (interactive / dev machines):**
+
+```python
+import asyncio
+from salesforce_py.data360 import Data360Client
+
+async def main():
     async with await Data360Client.from_env("my-org-alias") as client:
         submitted = await client.query.submit_sql_query(
             {"sql": "SELECT Id__c, Email__c FROM UnifiedIndividual__dlm LIMIT 10"},
             dataspace="default",
         )
 
-    # Direct token:
+asyncio.run(main())
+```
+
+**Option 3 — SF CLI org object:**
+
+```python
+import asyncio
+from salesforce_py.data360 import Data360Client
+from salesforce_py.sf import SFOrgTask
+
+async def main():
+    task = SFOrgTask("my-org-alias")
+    async with Data360Client.from_org(task._org) as client:
+        segments = await client.segments.get_segments()
+
+asyncio.run(main())
+```
+
+**Option 4 — direct token:**
+
+```python
+import asyncio
+from salesforce_py.data360 import Data360Client
+
+async def main():
     async with Data360Client(instance_url="...", access_token="...") as client:
-        ...
+        segments = await client.segments.get_segments()
 
 asyncio.run(main())
 ```
@@ -258,21 +326,31 @@ See [src/salesforce_py/data360/README.md](src/salesforce_py/data360/README.md) f
 
 The Models API uses a client-credentials OAuth flow. Client credentials are always required — standard SF CLI session tokens do not carry the `sfap_api`/`einstein_gpt_api` scopes.
 
+**Option 1 — environment variables (recommended for CI/CD):**
+
 ```python
 import asyncio
 from salesforce_py.models import ModelsClient
 from salesforce_py.models.supported_models import BEDROCK_ANTHROPIC_CLAUDE_46_SONNET
 
 async def main():
-    # From environment variables (recommended for CI/CD):
     async with await ModelsClient.from_env() as client:
         reply = await client.chat_generations.generate(
             BEDROCK_ANTHROPIC_CLAUDE_46_SONNET,
             messages=[{"role": "user", "content": "What is a DMO?"}],
         )
 
-    # Resolve domain from SF CLI, supply client creds:
-    from salesforce_py.sf import SFOrgTask
+asyncio.run(main())
+```
+
+**Option 2 — SF CLI org object (supply client creds, domain resolved from CLI):**
+
+```python
+import asyncio
+from salesforce_py.models import ModelsClient
+from salesforce_py.sf import SFOrgTask
+
+async def main():
     task = SFOrgTask("my-org-alias")
     async with await ModelsClient.from_org(
         task._org, consumer_key="<KEY>", consumer_secret="<SECRET>",
@@ -280,6 +358,22 @@ async def main():
         vectors = await client.embeddings.embed(
             "sfdc_ai__DefaultOpenAITextEmbeddingAda_002",
             ["customer loyalty program"],
+        )
+
+asyncio.run(main())
+```
+
+**Option 3 — direct token:**
+
+```python
+import asyncio
+from salesforce_py.models import ModelsClient
+
+async def main():
+    async with ModelsClient(access_token="...") as client:
+        reply = await client.generations.generate(
+            "sfdc_ai__DefaultOpenAIGPT4OmniMini",
+            "Summarise this case note in one sentence.",
         )
 
 asyncio.run(main())
