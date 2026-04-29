@@ -1,4 +1,8 @@
-# salesforce-py
+<p align="center">
+  <img src="img/salesforcepy-logo.png" alt="salesforce-py logo" width="358" height="281" />
+</p>
+
+<h1 align="center">salesforce-py</h1>
 
 > **Disclaimer:** This is an independent, community-maintained project and is **not affiliated with, endorsed by, or supported by Salesforce, Inc.** Salesforce, the Salesforce CLI, and related marks are trademarks of Salesforce, Inc.
 
