@@ -12,7 +12,14 @@
 
 > **Disclaimer:** This is an independent, community-maintained project and is **not affiliated with, endorsed by, or supported by Salesforce, Inc.** Salesforce, the Salesforce CLI, and related marks are trademarks of Salesforce, Inc.
 
-A Python wrapper for Salesforce CLIs and APIs. Provides a comprehensive sync wrapper for the [Salesforce CLI (`sf`)](https://developer.salesforce.com/tools/salesforcecli) plus a fully async client for the [Salesforce Connect REST API](https://developer.salesforce.com/docs/atlas.en-us.chatterapi.meta/chatterapi/intro_what_is_chatter_connect.htm) (Chatter, Files, Communities, Commerce, Einstein, and more). REST and Bulk API clients are on the roadmap.
+A Python wrapper for Salesforce CLIs and APIs. Ships four independent clients:
+
+- **SF CLI wrapper** — sync/async subprocess wrapper for the [`sf` CLI](https://developer.salesforce.com/tools/salesforcecli)
+- **Connect REST API** — async client for `/services/data/vXX.X/connect/` (Chatter, Files, Communities, Commerce, Einstein, and more)
+- **Data 360 Connect REST API** — async client for `/services/data/vXX.X/ssot/` (Data Cloud / Data 360)
+- **Models REST API** — async client for the Einstein Models generative AI surface (`chat-generations`, `generations`, `embeddings`, `feedback`)
+
+REST and Bulk API clients are on the roadmap.
 
 ## Requirements
 
@@ -32,6 +39,12 @@ With optional extras:
 ```bash
 # Connect REST API (Chatter, Files, Communities, Commerce, Einstein, etc.)
 pip install "salesforce-py[connect]"
+
+# Data 360 Connect REST API (Data Cloud / CDP)
+pip install "salesforce-py[data360]"
+
+# Models REST API (Einstein generative AI)
+pip install "salesforce-py[models]"
 
 # REST API support (planned)
 pip install "salesforce-py[rest]"
@@ -155,7 +168,130 @@ Install with the `connect` extra (pulls in `httpx[http2]`):
 pip install "salesforce-py[connect]"
 ```
 
-See [tests/connect/README.md](src/salesforce_py/connect/README.md) for the full Connect API reference — the complete list of operation namespaces, authentication patterns, more examples, error handling, ID normalisation, HTTP/2 configuration, and testing guidance.
+See [src/salesforce_py/connect/README.md](src/salesforce_py/connect/README.md) for the full Connect API reference — the complete list of operation namespaces, authentication patterns, more examples, error handling, ID normalisation, HTTP/2 configuration, and testing guidance.
+
+## Data 360 REST API
+
+`salesforce_py.data360` is a fully async client for the Salesforce Data 360 Connect REST API — the endpoint family under `/services/data/vXX.X/ssot/` (formerly Data Cloud / CDP). HTTP/2 is negotiated by default.
+
+```python
+import asyncio
+from salesforce_py.data360 import Data360Client
+
+async def main():
+    async with Data360Client(
+        instance_url="https://myorg.my.salesforce.com",
+        access_token="<bearer-token>",
+    ) as client:
+        # Run a SQL query
+        submitted = await client.query.submit_sql_query(
+            {"sql": "SELECT Id__c, Email__c FROM UnifiedIndividual__dlm LIMIT 10"},
+            dataspace="default",
+        )
+
+        # List segments
+        segments = await client.segments.get_segments()
+
+asyncio.run(main())
+```
+
+Install with the `data360` extra (pulls in `httpx[http2]`):
+
+```bash
+pip install "salesforce-py[data360]"
+```
+
+**Operation namespaces** — 26 grouped wrappers covering the full `/ssot/` surface:
+
+| Namespace | Endpoint family |
+|---|---|
+| `client.activation_targets` | `/ssot/activation-targets` |
+| `client.activations` | `/ssot/activations`, `/ssot/activation-external-platforms` |
+| `client.calculated_insights` | `/ssot/calculated-insights` |
+| `client.connections` | `/ssot/connections`, schema/sitemap/actions |
+| `client.connectors` | `/ssot/connectors` |
+| `client.data_action_targets` | `/ssot/data-action-targets` |
+| `client.data_actions` | `/ssot/data-actions` |
+| `client.data_clean_room` | `/ssot/data-clean-room/{collaborations,providers,templates,specifications}` |
+| `client.data_graphs` | `/ssot/data-graphs` |
+| `client.data_kits` | `/ssot/data-kits` |
+| `client.data_lake_objects` | `/ssot/data-lake-objects` |
+| `client.data_model_objects` | `/ssot/data-model-objects`, `/ssot/data-model-object-mappings` |
+| `client.data_spaces` | `/ssot/data-spaces` |
+| `client.data_streams` | `/ssot/data-streams` |
+| `client.data_transforms` | `/ssot/data-transforms` |
+| `client.document_ai` | `/ssot/document-processing/…` |
+| `client.identity_resolutions` | `/ssot/identity-resolutions` |
+| `client.insights` | `/ssot/insight/metadata`, `/ssot/insight/calculated-insights/{name}` |
+| `client.machine_learning` | `/ssot/machine-learning/…` |
+| `client.metadata` | `/ssot/metadata`, `/ssot/metadata-entities` |
+| `client.private_network_routes` | `/ssot/private-network-routes` |
+| `client.profile` | `/ssot/profile/…` |
+| `client.query` | `/ssot/query`, `/ssot/queryv2`, `/ssot/query-sql*` |
+| `client.search_index` | `/ssot/search-index` |
+| `client.segments` | `/ssot/segments` |
+| `client.universal_id_lookup` | `/ssot/universalIdLookup/…` |
+
+See [src/salesforce_py/data360/README.md](src/salesforce_py/data360/README.md) for full usage, authentication patterns, error handling, and testing guidance.
+
+## Models REST API
+
+`salesforce_py.models` is a fully async client for the Salesforce Einstein Models REST API at `https://api.salesforce.com/einstein/platform/v1/`. It covers chat generation, text generation, embeddings, and feedback. HTTP/2 is negotiated by default.
+
+The Models API uses a client-credentials OAuth flow — use `fetch_token` to mint a JWT from your External Client App credentials:
+
+```python
+import asyncio
+from salesforce_py.models import fetch_token, ModelsClient
+from salesforce_py.models.supported_models import BEDROCK_ANTHROPIC_CLAUDE_46_SONNET
+
+async def main():
+    token = await fetch_token(
+        my_domain="https://mycompany.my.salesforce.com",
+        consumer_key="<CONSUMER_KEY>",
+        consumer_secret="<CONSUMER_SECRET>",
+    )
+
+    async with ModelsClient(
+        token.access_token,
+        base_url=f"{token.api_instance_url}/einstein/platform/v1/" if token.api_instance_url else None,
+    ) as client:
+        # Chat generation
+        reply = await client.chat_generations.generate(
+            BEDROCK_ANTHROPIC_CLAUDE_46_SONNET,
+            messages=[
+                {"role": "system", "content": "You are a helpful Salesforce expert."},
+                {"role": "user", "content": "What is a DMO?"},
+            ],
+        )
+
+        # Embeddings
+        vectors = await client.embeddings.embed(
+            "sfdc_ai__DefaultOpenAITextEmbeddingAda_002",
+            ["customer loyalty program", "referral rewards"],
+        )
+
+asyncio.run(main())
+```
+
+Install with the `models` extra (pulls in `httpx[http2]`):
+
+```bash
+pip install "salesforce-py[models]"
+```
+
+**Operation namespaces:**
+
+| Namespace | Endpoint |
+|---|---|
+| `client.generations` | `/models/{modelName}/generations` |
+| `client.chat_generations` | `/models/{modelName}/chat-generations` |
+| `client.embeddings` | `/models/{modelName}/embeddings` |
+| `client.feedback` | `/feedback` |
+
+Supported model API names are exported as constants from `salesforce_py.models.supported_models` (`BEDROCK_ANTHROPIC_CLAUDE_46_SONNET`, `GPT_4_OMNI`, `VERTEX_GEMINI_25_PRO`, etc.). BYOLLM model names work too — pass any string.
+
+See [src/salesforce_py/models/README.md](src/salesforce_py/models/README.md) for full usage, rate limits, error handling, and testing guidance.
 
 ## SF CLI setup helper
 
