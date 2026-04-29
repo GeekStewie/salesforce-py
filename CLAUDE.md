@@ -12,6 +12,7 @@ uv sync --extra dev
 uv sync --extra dev --extra connect     # Connect REST API client
 uv sync --extra dev --extra data360     # Data 360 Connect REST API client
 uv sync --extra dev --extra models      # Models (Einstein generative AI) REST API client
+uv sync --extra dev --extra bulk        # Bulk API 2.0 client (ingest + query with duckdb)
 uv sync --extra dev --extra all         # everything
 
 # Run all tests
@@ -48,12 +49,13 @@ uv build && uv publish
 
 ## Architecture
 
-salesforce-py ships four independent clients that target different Salesforce surfaces. They share `salesforce_py.exceptions` and `salesforce_py.utils`, but are otherwise unrelated:
+salesforce-py ships five independent clients that target different Salesforce surfaces. They share `salesforce_py.exceptions` and `salesforce_py.utils`, but are otherwise unrelated:
 
 - `salesforce_py.sf` — sync wrapper around the `sf` CLI (subprocess-based)
 - `salesforce_py.connect` — async HTTP client for the Connect REST API (httpx-based)
 - `salesforce_py.data360` — async HTTP client for the Data 360 (CDP) Connect REST API (httpx-based)
 - `salesforce_py.models` — async HTTP client for the Einstein Models REST API (httpx-based)
+- `salesforce_py.bulk` — async HTTP client for the Bulk API 2.0 (httpx + duckdb for client-side sort)
 
 `salesforce_py._defaults.DEFAULT_API_VERSION` is the single source of truth for the fallback API version used by all clients.
 
@@ -170,6 +172,38 @@ Supported-model API names are exported as string constants from `salesforce_py.m
 
 See `src/salesforce_py/models/README.md` for usage examples and the rate-limit table.
 
+### Bulk API 2.0 client (`salesforce_py/bulk/`)
+
+Async client for `/services/data/vXX.X/jobs/` — the ingest (CSV write) and query (SOQL read) surface of Bulk API 2.0.
+
+```
+BulkClient              # bulk/client.py — user-facing entry point
+  ├── BulkSession       # bulk/_session.py — single httpx.AsyncClient
+  │                     #   bound to /services/data/vXX.X/jobs/
+  ├── IngestOperations  # bulk/operations/ingest.py — /jobs/ingest/ lifecycle
+  └── QueryOperations   # bulk/operations/query.py — /jobs/query/ lifecycle
+        └── BulkBaseOperations  # bulk/base.py — JSON helpers + _put_csv/_get_csv
+```
+
+`BulkClient` is token-driven, mirrors the `Data360Client` / `ConnectClient` shape (`from_env` uses the `BULK` prefix), and owns a single `BulkSession` — both `/jobs/ingest/` and `/jobs/query/` share the same base URL.
+
+**Ingest lifecycle** (`client.ingest`): `create_job` → `upload_data` (PUT CSV to `contentUrl`, client-side-validated against the 100 MB raw / 150 MB base64 ceiling) → `upload_complete` (PATCH to `UploadComplete`) → poll `get_job` → download `get_successful_results` / `get_failed_results` / `get_unprocessed_results` → `delete_job`. `upsert(object_name, external_id_field, csv_data, ...)` is a convenience wrapper that chains create + upload + complete in one call.
+
+**Query lifecycle** (`client.query`): `create_job` automatically strips `ORDER BY` from the submitted SOQL (since it disables PK chunking) and captures the clause as `job["_stripped_order_by"]` — an `OrderByClause` dataclass parsed into `(expression, direction, nulls)` tuples. `run_query(soql, ...)` is the end-to-end helper: submit → poll → download all pages via `get_all_results` → reapply the captured `ORDER BY` client-side via DuckDB → return combined CSV bytes. `get_parallel_results` returns `/resultPages` locator cursors (API 58.0+) for concurrent page download.
+
+**Limits + validation** (`bulk/_limits.py`): constants (`MAX_UPLOAD_BYTES_RAW`, `INGEST_RECORDS_PER_BATCH`, `DAILY_INGEST_RECORD_LIMIT`, etc.), frozensets (`INGEST_OPERATIONS`, `QUERY_OPERATIONS`, `COLUMN_DELIMITERS`, `LINE_ENDINGS`), and `validate_*` helpers called by the operations classes to fail fast with clear client-side errors instead of opaque server rejections.
+
+**SOQL prep** (`bulk/_soql.py`): `prepare_query(soql) → PreparedQuery(soql=..., order_by=...)` strips `ORDER BY` up to the next `LIMIT`/`OFFSET`/`FOR VIEW`/`UPDATE TRACKING` boundary and runs `validate_soql` to reject constructs Bulk 2.0 doesn't support (`GROUP BY`, `OFFSET`, `TYPEOF`, aggregates like `COUNT()`/`SUM()`).
+
+**DuckDB helpers** (`bulk/_duckdb.py`): `concatenate_csv_pages(pages, line_ending)` joins paginated CSV pages into a single payload (preserving the header from page 1, stripping it from subsequent pages); `apply_order_by(csv_data, order_by, column_delimiter, line_ending)` round-trips through DuckDB to reapply the sort — lazy-imported so the module is usable even if DuckDB is absent (as long as no query uses `ORDER BY`).
+
+#### Adding a new Bulk operation class
+
+1. Create `src/salesforce_py/bulk/operations/mynamespace.py` subclassing `BulkBaseOperations`
+2. Use `_get/_post/_patch/_delete` for JSON endpoints, `_put_csv(path, data=...)` for CSV uploads, `_get_csv(path, params=...)` for CSV downloads (returns the raw `httpx.Response` so callers can read `Sforce-Locator` / `Sforce-NumberOfRecords` headers)
+3. Validate inputs against the whitelists in `bulk/_limits.py` before submission
+4. Export the class from `bulk/operations/__init__.py` and wire it into `BulkClient.__init__`
+
 ## Exceptions
 
 All exceptions live in `salesforce_py/exceptions.py`:
@@ -177,7 +211,7 @@ All exceptions live in `salesforce_py/exceptions.py`:
 `SalesforcePyError` (base) → `CLINotFoundError` (sf not on PATH) → `CLIError` (non-zero sf exit, carries `returncode`, `stdout`, `stderr`) → `AuthError` (OAuth / 401).
 
 - `CLIError` is raised by both `_runner.run` (async sf path) and `SFBaseOperations._run` (sync sf path).
-- `AuthError` is raised by `ConnectBaseOperations._handle_status`, `Data360BaseOperations._handle_status`, and `ModelsBaseOperations._handle_status` on a 401 response, and by `salesforce_py.models.fetch_token` on 400/401 token-endpoint failures.
+- `AuthError` is raised by `ConnectBaseOperations._handle_status`, `Data360BaseOperations._handle_status`, `ModelsBaseOperations._handle_status`, and `BulkBaseOperations._handle_status` on a 401 response, and by `salesforce_py.models.fetch_token` on 400/401 token-endpoint failures.
 - `SalesforcePyError` covers everything else (non-JSON response, non-2xx status, timeouts, etc.).
 
 ## Utilities (`salesforce_py/utils/`)
@@ -194,10 +228,11 @@ Both are re-exported from `salesforce_py.utils`.
 - `connect` — `httpx[http2]`. Required for `salesforce_py.connect`. The package raises a helpful `ImportError` at import time if it is missing.
 - `data360` — `httpx[http2]`. Required for `salesforce_py.data360`. The package raises a helpful `ImportError` at import time if it is missing.
 - `models` — `httpx[http2]`. Required for `salesforce_py.models`. The package raises a helpful `ImportError` at import time if it is missing.
-- `rest`, `bulk` — `httpx[http2]`, `pydantic`, plus `aiofiles` for `bulk`. Reserved for future REST / Bulk API modules — `src/salesforce_py/rest/` and `src/salesforce_py/bulk/` currently contain only package stubs.
+- `bulk` — `httpx[http2]`, `aiofiles`, and `duckdb`. Required for `salesforce_py.bulk`; `duckdb` powers the client-side `ORDER BY` re-sort for query results.
+- `rest` — `httpx[http2]`, `pydantic`. Reserved for the future REST API module — `src/salesforce_py/rest/` currently contains only a package stub.
 - `code-analyzer` — `ruamel.yaml`, used by `SFCodeAnalyzerManager`. Import-guarded.
-- `all` — union of `httpx[http2]`, `pydantic`, `aiofiles`, `ruamel.yaml`.
-- `dev` — `pytest`, `pytest-asyncio`, `pytest-cov`, `ruff`, `ty`, and `httpx[http2]` (so the Connect + Data 360 + Models tests run under `dev`).
+- `all` — union of `httpx[http2]`, `pydantic`, `aiofiles`, `duckdb`, `ruamel.yaml`.
+- `dev` — `pytest`, `pytest-asyncio`, `pytest-cov`, `ruff`, `ty`, `httpx[http2]`, and `duckdb` (so the Connect + Data 360 + Models + Bulk tests run under `dev`).
 
 ## Package layout
 
@@ -205,8 +240,8 @@ Both are re-exported from `salesforce_py.utils`.
 - `src/salesforce_py/connect/` — Connect REST API client (async)
 - `src/salesforce_py/data360/` — Data 360 (CDP) Connect REST API client (async)
 - `src/salesforce_py/models/` — Einstein Models REST API client (async)
+- `src/salesforce_py/bulk/` — Bulk API 2.0 client (async, httpx + duckdb)
 - `src/salesforce_py/rest/` — future REST API client (stub)
-- `src/salesforce_py/bulk/` — future Bulk API client (stub)
 - `src/salesforce_py/utils/` — shared ID helpers + `utils/data/object_prefixes.json`
 - `src/salesforce_py/exceptions.py` — all exceptions
 - `src/salesforce_py/_defaults.py` — `DEFAULT_API_VERSION`
@@ -214,4 +249,5 @@ Both are re-exported from `salesforce_py.utils`.
 - `tests/connect/` — Connect API tests; fixtures patch `ConnectSession`'s underlying `httpx.AsyncClient` so individual tests assert on URL, params, and JSON payload
 - `tests/data360/` — Data 360 API tests; same pattern as `tests/connect/`, patching the per-call session methods on `Data360Client`
 - `tests/models/` — Models API tests; same pattern as `tests/data360/`, patching session verbs on `ModelsClient`, plus mocked `httpx.AsyncClient` for the token helper
+- `tests/bulk/` — Bulk API tests; patches session verbs on `BulkClient`, mocks `Sforce-Locator` pagination headers, and exercises `_soql.prepare_query` + the DuckDB sort round-trip
 - `tests/utils/` — utility helper tests

@@ -12,14 +12,15 @@
 
 > **Disclaimer:** This is an independent, community-maintained project and is **not affiliated with, endorsed by, or supported by Salesforce, Inc.** Salesforce, the Salesforce CLI, and related marks are trademarks of Salesforce, Inc.
 
-A Python wrapper for Salesforce CLIs and APIs. Ships four independent clients:
+A Python wrapper for Salesforce CLIs and APIs. Ships five independent clients:
 
 - **SF CLI wrapper** — sync/async subprocess wrapper for the [`sf` CLI](https://developer.salesforce.com/tools/salesforcecli)
 - **Connect REST API** — async client for `/services/data/vXX.X/connect/` (Chatter, Files, Communities, Commerce, Einstein, and more)
 - **Data 360 Connect REST API** — async client for `/services/data/vXX.X/ssot/` (Data Cloud / Data 360)
 - **Models REST API** — async client for the Einstein Models generative AI surface (`chat-generations`, `generations`, `embeddings`, `feedback`)
+- **Bulk API 2.0** — async client for `/services/data/vXX.X/jobs/` with automatic `ORDER BY` handling via DuckDB
 
-REST and Bulk API clients are on the roadmap.
+The REST API client is on the roadmap.
 
 ## Requirements
 
@@ -46,11 +47,11 @@ pip install "salesforce-py[data360]"
 # Models REST API (Einstein generative AI)
 pip install "salesforce-py[models]"
 
+# Bulk API 2.0 (ingest + query, with DuckDB for client-side ORDER BY)
+pip install "salesforce-py[bulk]"
+
 # REST API support (planned)
 pip install "salesforce-py[rest]"
-
-# Bulk API support (planned)
-pip install "salesforce-py[bulk]"
 
 # Salesforce Code Analyzer plugin support
 pip install "salesforce-py[code-analyzer]"
@@ -405,6 +406,100 @@ pip install "salesforce-py[models]"
 Supported model API names are exported as constants from `salesforce_py.models.supported_models` (`BEDROCK_ANTHROPIC_CLAUDE_46_SONNET`, `GPT_4_OMNI`, `VERTEX_GEMINI_25_PRO`, etc.). BYOLLM model names work too — pass any string.
 
 See [src/salesforce_py/models/README.md](src/salesforce_py/models/README.md) for full usage, rate limits, error handling, and testing guidance.
+
+## Bulk API 2.0
+
+`salesforce_py.bulk` is a fully async client for the Salesforce Bulk API 2.0 — the endpoint family under `/services/data/vXX.X/jobs/`. It covers the full ingest (CSV write) and query (SOQL read) lifecycle documented in the Bulk API 2.0 Developer Guide, with HTTP/2 negotiated by default.
+
+Key features:
+
+- **Full lifecycle** — `create_job` → `upload_data` → `upload_complete` → poll → download / concatenate results → `delete_job`, plus convenience wrappers (`ingest.upsert`, `query.run_query`) for the common end-to-end patterns.
+- **Automatic `ORDER BY` stripping** — Bulk 2.0 disables PK chunking when a query has `ORDER BY`, which can push large queries into timeouts. The client removes the clause before submission, captures the sort keys, and reapplies the order client-side via [DuckDB](https://duckdb.org/) after downloading the paginated CSV pages.
+- **Client-side limit validation** — delimiters, line endings, operations, and upload sizes are validated before dispatch, failing fast with a clear `ValueError` instead of an opaque server rejection.
+- **Parallel result download** — `query.get_parallel_results` exposes the `/resultPages` locator cursors (API 58.0+) so you can `asyncio.gather` the downloads.
+
+**Option 1 — environment variables (recommended for CI/CD):**
+
+```python
+import asyncio
+from salesforce_py.bulk import BulkClient
+
+async def main():
+    async with await BulkClient.from_env() as client:
+        csv_bytes = await client.query.run_query(
+            "SELECT Id, Name FROM Account ORDER BY CreatedDate DESC LIMIT 10000"
+        )
+
+asyncio.run(main())
+```
+
+**Option 2 — SF CLI session (interactive / dev machines):**
+
+```python
+import asyncio
+from salesforce_py.bulk import BulkClient
+
+async def main():
+    async with await BulkClient.from_env("my-org-alias") as client:
+        await client.ingest.upsert(
+            object_name="Account",
+            external_id_field="ExtId__c",
+            csv_data=b"ExtId__c,Name\nA1,Acme\nB2,Beta\n",
+        )
+
+asyncio.run(main())
+```
+
+**Option 3 — SF CLI org object:**
+
+```python
+import asyncio
+from salesforce_py.bulk import BulkClient
+from salesforce_py.sf import SFOrgTask
+
+async def main():
+    task = SFOrgTask("my-org-alias")
+    async with BulkClient.from_org(task._org) as client:
+        job = await client.ingest.create_job(object_name="Account", operation="insert")
+
+asyncio.run(main())
+```
+
+**Option 4 — direct token:**
+
+```python
+import asyncio
+from salesforce_py.bulk import BulkClient
+
+async def main():
+    async with BulkClient(instance_url="...", access_token="...") as client:
+        ...
+
+asyncio.run(main())
+```
+
+**Environment variables:**
+
+| Variable | Purpose |
+|---|---|
+| `SF_BULK_CLIENT_ID` | External Client App consumer key |
+| `SF_BULK_CLIENT_SECRET` | External Client App consumer secret |
+| `SF_BULK_INSTANCE_URL` | My Domain URL (falls back to `SF_INSTANCE_URL`) |
+
+Install with the `bulk` extra (pulls in `httpx[http2]` and `duckdb`):
+
+```bash
+pip install "salesforce-py[bulk]"
+```
+
+**Operation namespaces:**
+
+| Namespace | Endpoint family |
+|---|---|
+| `client.ingest` | `/jobs/ingest/` — CSV write jobs (insert/update/upsert/delete/hardDelete) |
+| `client.query` | `/jobs/query/` — SOQL read jobs with automatic `ORDER BY` handling |
+
+See [src/salesforce_py/bulk/README.md](src/salesforce_py/bulk/README.md) for the full Bulk API 2.0 reference — lifecycle diagrams, automatic `ORDER BY` handling, limit validation, error handling, and testing guidance.
 
 ## SF CLI setup helper
 

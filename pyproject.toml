@@ -19,7 +19,7 @@ Issues = "https://github.com/geekstewie/salesforce-py/issues"
 
 [project.optional-dependencies]
 rest = ["httpx[http2]>=0.27", "pydantic>=2.7"]
-bulk = ["httpx[http2]>=0.27", "pydantic>=2.7", "aiofiles>=23.0"]
+bulk = ["httpx[http2]>=0.27", "aiofiles>=23.0", "duckdb>=1.0"]
 connect = ["httpx[http2]>=0.27"]
 data360 = ["httpx[http2]>=0.27"]
 models = ["httpx[http2]>=0.27"]
@@ -32,8 +32,15 @@ dev = [
     "ty>=0.0.1",
     "bandit>=1.7",
     "httpx[http2]>=0.27",
+    "duckdb>=1.0",
 ]
-all = ["httpx[http2]>=0.27", "pydantic>=2.7", "aiofiles>=23.0", "ruamel.yaml>=0.18"]
+all = [
+    "httpx[http2]>=0.27",
+    "pydantic>=2.7",
+    "aiofiles>=23.0",
+    "duckdb>=1.0",
+    "ruamel.yaml>=0.18",
+]
 
 [tool.hatch.publish.index]
 repo = "main"
