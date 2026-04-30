@@ -12,15 +12,14 @@
 
 > **Disclaimer:** This is an independent, community-maintained project and is **not affiliated with, endorsed by, or supported by Salesforce, Inc.** Salesforce, the Salesforce CLI, and related marks are trademarks of Salesforce, Inc.
 
-A Python wrapper for Salesforce CLIs and APIs. Ships five independent clients:
+A Python wrapper for Salesforce CLIs and APIs. Ships six independent clients:
 
 - **SF CLI wrapper** — sync/async subprocess wrapper for the [`sf` CLI](https://developer.salesforce.com/tools/salesforcecli)
+- **REST API** — async client for `/services/data/vXX.X/` (SOQL/SOSL, sObject CRUD, composite / batch / graph / tree, quick actions, invocable actions, tooling, UI API, analytics, process / approvals, and the rest)
 - **Connect REST API** — async client for `/services/data/vXX.X/connect/` (Chatter, Files, Communities, Commerce, Einstein, and more)
 - **Data 360 Connect REST API** — async client for `/services/data/vXX.X/ssot/` (Data Cloud / Data 360)
 - **Models REST API** — async client for the Einstein Models generative AI surface (`chat-generations`, `generations`, `embeddings`, `feedback`)
 - **Bulk API 2.0** — async client for `/services/data/vXX.X/jobs/` with automatic `ORDER BY` handling via DuckDB
-
-The REST API client is on the roadmap.
 
 ## Requirements
 
@@ -38,6 +37,9 @@ pip install salesforce-py
 With optional extras:
 
 ```bash
+# REST API (SOQL/SOSL, sObject CRUD, composite, quick/invocable actions, tooling, UI API, etc.)
+pip install "salesforce-py[rest]"
+
 # Connect REST API (Chatter, Files, Communities, Commerce, Einstein, etc.)
 pip install "salesforce-py[connect]"
 
@@ -49,9 +51,6 @@ pip install "salesforce-py[models]"
 
 # Bulk API 2.0 (ingest + query, with DuckDB for client-side ORDER BY)
 pip install "salesforce-py[bulk]"
-
-# REST API support (planned)
-pip install "salesforce-py[rest]"
 
 # Salesforce Code Analyzer plugin support
 pip install "salesforce-py[code-analyzer]"
@@ -138,6 +137,105 @@ task.agent.test_run(api_name="MyAgentTest", wait=5)
 | `task.sobject` | sObject CRUD helpers |
 | `task.template` | Project template generation |
 | `task.ui_bundle` | UI Bundle deployment |
+
+## REST API
+
+`salesforce_py.rest` is a fully async client for the Salesforce REST API — the family of endpoints served under `/services/data/vXX.X/`. It covers SOQL / SOSL queries, every `/sobjects/...` resource (describe, CRUD, upsert, list views, layouts, relationships, deleted/updated, event schemas, user password), the composite / batch / graph / tree families, quick actions, invocable actions, tooling, UI API, analytics, process / approvals, support, and more. HTTP/2 is negotiated by default.
+
+**Option 1 — environment variables (recommended for CI/CD):**
+
+```python
+import asyncio
+from salesforce_py.rest import RestClient
+
+async def main():
+    async with await RestClient.from_env() as client:
+        rows = await client.query.query("SELECT Id, Name FROM Account LIMIT 10")
+
+asyncio.run(main())
+```
+
+**Option 2 — SF CLI session (interactive / dev machines):**
+
+```python
+import asyncio
+from salesforce_py.rest import RestClient
+
+async def main():
+    async with await RestClient.from_env("my-org-alias") as client:
+        created = await client.sobjects.create("Account", {"Name": "Acme Corp"})
+
+asyncio.run(main())
+```
+
+**Option 3 — SF CLI org object:**
+
+```python
+import asyncio
+from salesforce_py.rest import RestClient
+from salesforce_py.sf import SFOrgTask
+
+async def main():
+    task = SFOrgTask("my-org-alias")
+    async with RestClient.from_org(task._org) as client:
+        me = await client.sobjects.get("User", "005xx000001SvD8AAK")
+
+asyncio.run(main())
+```
+
+**Option 4 — direct token:**
+
+```python
+import asyncio
+from salesforce_py.rest import RestClient
+
+async def main():
+    async with RestClient(instance_url="...", access_token="...") as client:
+        limits = await client.limits.get_limits()
+
+asyncio.run(main())
+```
+
+**Environment variables:**
+
+| Variable | Purpose |
+|---|---|
+| `SF_REST_CLIENT_ID` | External Client App consumer key |
+| `SF_REST_CLIENT_SECRET` | External Client App consumer secret |
+| `SF_REST_INSTANCE_URL` | My Domain URL (falls back to `SF_INSTANCE_URL`) |
+
+Install with the `rest` extra (pulls in `httpx[http2]`):
+
+```bash
+pip install "salesforce-py[rest]"
+```
+
+**Operation namespaces:**
+
+| Namespace | Endpoint family |
+|---|---|
+| `client.versions` | `/services/data` and `/services/data/vXX.X` — version + resource listings |
+| `client.limits` | `/limits`, `/limits/recordCount` |
+| `client.query` | `/query`, `/queryAll`, async SOQL |
+| `client.search` | `/search` (SOSL), `/parameterizedSearch`, scope / suggestions / layouts |
+| `client.sobjects` | Everything under `/sobjects/` — describe, CRUD, upsert, list views, layouts, relationships, deleted/updated, event schemas, user password, quick actions |
+| `client.composite` | `/composite`, `/composite/batch`, `/composite/graph`, `/composite/tree/{sobject}`, `/composite/sobjects` |
+| `client.quick_actions` | Global `/quickActions` (list, describe, default values, invoke) |
+| `client.actions` | `/actions/standard`, `/actions/custom` — invocable actions |
+| `client.tabs`, `client.theme`, `client.recent` | `/tabs`, `/theme`, `/recent` |
+| `client.app_menu` | `/appMenu` (AppSwitcher, Salesforce1) |
+| `client.lightning_usage` | Lightning Adoption metric sObjects |
+| `client.process` | `/process/approvals`, `/process/rules` |
+| `client.support` | Data category groups, embedded service, field service, knowledge articles |
+| `client.tooling` | `/tooling/` — query, describe, execute-anonymous, run-tests |
+| `client.ui_api` | `/ui-api/` — records, record-ui, object-info, layouts, picklist-values |
+| `client.metadata` | `/metadata/` passthrough |
+| `client.analytics` / `client.wave` / `client.folders` / `client.smart_data_discovery` / `client.eclair` / `client.jsonxform` | Analytics family |
+| `client.streaming` | `/sobjects/StreamingChannel/{id}/push` |
+| `client.financial_services` / `client.health_cloud` / `client.manufacturing` / `client.consumer_goods` | Industry cloud `/connect/` passthroughs |
+| `client.asset_management` / `client.chatter` / `client.commerce` / `client.connect` / `client.consent` / `client.contact_tracing` / `client.dedupe` / `client.jobs` / `client.knowledge_management` / `client.licensing` / `client.localized_value` / `client.payments` / `client.scheduling` | Small-surface passthroughs |
+
+See [src/salesforce_py/rest/README.md](src/salesforce_py/rest/README.md) for the full REST API reference — operation namespaces, authentication patterns, error handling, HTTP/2 configuration, and testing guidance.
 
 ## Connect REST API
 

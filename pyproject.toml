@@ -18,7 +18,7 @@ Repository = "https://github.com/geekstewie/salesforce-py"
 Issues = "https://github.com/geekstewie/salesforce-py/issues"
 
 [project.optional-dependencies]
-rest = ["httpx[http2]>=0.27", "pydantic>=2.7"]
+rest = ["httpx[http2]>=0.27"]
 bulk = ["httpx[http2]>=0.27", "aiofiles>=23.0", "duckdb>=1.0"]
 connect = ["httpx[http2]>=0.27"]
 data360 = ["httpx[http2]>=0.27"]
@@ -36,7 +36,6 @@ dev = [
 ]
 all = [
     "httpx[http2]>=0.27",
-    "pydantic>=2.7",
     "aiofiles>=23.0",
     "duckdb>=1.0",
     "ruamel.yaml>=0.18",

@@ -9,6 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 uv sync --extra dev
 
 # Install with specific extras
+uv sync --extra dev --extra rest        # REST API client (SOQL/SOSL, sObjects, composite, tooling, UI API, ...)
 uv sync --extra dev --extra connect     # Connect REST API client
 uv sync --extra dev --extra data360     # Data 360 Connect REST API client
 uv sync --extra dev --extra models      # Models (Einstein generative AI) REST API client
@@ -49,9 +50,10 @@ uv build && uv publish
 
 ## Architecture
 
-salesforce-py ships five independent clients that target different Salesforce surfaces. They share `salesforce_py.exceptions` and `salesforce_py.utils`, but are otherwise unrelated:
+salesforce-py ships six independent clients that target different Salesforce surfaces. They share `salesforce_py.exceptions` and `salesforce_py.utils`, but are otherwise unrelated:
 
 - `salesforce_py.sf` — sync wrapper around the `sf` CLI (subprocess-based)
+- `salesforce_py.rest` — async HTTP client for the core Salesforce REST API (httpx-based)
 - `salesforce_py.connect` — async HTTP client for the Connect REST API (httpx-based)
 - `salesforce_py.data360` — async HTTP client for the Data 360 (CDP) Connect REST API (httpx-based)
 - `salesforce_py.models` — async HTTP client for the Einstein Models REST API (httpx-based)
@@ -68,7 +70,7 @@ All callouts — HTTP requests and `sf` CLI subprocesses — share one retry sha
 - **CLI retry**: one retry after `CLI_RETRY_DELAY = 10.0` seconds on `subprocess.TimeoutExpired` / `asyncio.TimeoutError`. `CLINotFoundError` and `CLIError` are **not** retried.
 - After a transient-response retry is exhausted, the final response is handed back to the client's `_handle` layer so `SalesforcePyError` surfaces with the body attached (rather than a raw tenacity `RetryError`).
 
-Retry machinery is built on `tenacity` (`AsyncRetrying` / `Retrying` with `wait_fixed` + `stop_after_attempt(2)` + `retry_if_exception`). Helpers: `retry_async_http_call` (wraps each `_get/_post/...` in `ConnectBaseOperations`, `Data360BaseOperations`, `ModelsBaseOperations`, plus the Models `fetch_token` call), `retry_sync_cli` (wraps `subprocess.run` in `SFBaseOperations._run`), `retry_async_cli` (wraps each attempt in `sf/_runner.py::run`).
+Retry machinery is built on `tenacity` (`AsyncRetrying` / `Retrying` with `wait_fixed` + `stop_after_attempt(2)` + `retry_if_exception`). Helpers: `retry_async_http_call` (wraps each `_get/_post/...` in `RestBaseOperations`, `ConnectBaseOperations`, `Data360BaseOperations`, `ModelsBaseOperations`, `BulkBaseOperations`, plus the Models `fetch_token` call), `retry_sync_cli` (wraps `subprocess.run` in `SFBaseOperations._run`), `retry_async_cli` (wraps each attempt in `sf/_runner.py::run`).
 
 ### SF CLI wrapper (`salesforce_py/sf/`)
 
@@ -100,6 +102,35 @@ SFOrgTask          # sf/task.py — user-facing entry point, one per org
 3. Set `include_target_org=False` for commands that are not org-scoped (e.g. alias, config)
 4. Set `include_json=False` for streaming commands that don't support `--json` (e.g. `apex tail log`) — these return `{"output": "<raw stdout>"}`
 5. Add the class to `sf/operations/__init__.py` and wire it into `SFOrgTask` in `sf/task.py`
+
+### REST API client (`salesforce_py/rest/`)
+
+Async client for `/services/data/vXX.X/` — the core Salesforce REST API surface. Covers SOQL / SOSL queries, every `/sobjects/...` resource, the composite / batch / graph / tree families, quick actions, invocable actions, tooling, UI API, analytics, process / approvals, support, and the rest. Built on `httpx` with HTTP/2 negotiated by default.
+
+```
+RestClient              # rest/client.py — user-facing entry point
+  ├── RestSession       # rest/_session.py — single httpx.AsyncClient
+  │                     #   bound to /services/data/v{api_version}/
+  └── *Operations       # rest/operations/*.py — one class per endpoint family
+        └── RestBaseOperations  # rest/base.py — _get/_post/_patch/_put/_delete/_get_bytes
+```
+
+`RestClient` is token-driven — callers supply `instance_url` + `access_token` (no OAuth flow is performed by the client itself; `from_env` uses the `REST` env-var prefix to mint a client-credentials token when needed). Use it as an async context manager or call `open()` / `close()` manually. It owns a single `RestSession`, since every top-level REST resource is addressable under the version-scoped base URL.
+
+`RestBaseOperations._handle()` maps `401 → AuthError`, other `4xx/5xx → SalesforcePyError` (carrying the first 500 chars of the body), returns `{}` for `204` / empty bodies, and unwraps JSON otherwise. `_get_bytes` returns the raw response for binary endpoints (attachment blobs, rich-text images).
+
+The un-versioned `/services/data` root (list of available API versions) is addressed by `VersionsOperations.list_versions()` via an absolute URL built against the instance URL, since it is not under the version-scoped base path.
+
+For small-surface namespaces (consent, dedupe, contact-tracing, licensing, scheduling, etc.), `rest/operations/misc.py` uses a `_make_passthrough(namespace)` factory to generate thin wrappers with generic `get/post/patch/put/delete` methods that prepend the namespace's base path. This lets callers hit any sub-resource without waiting for a dedicated helper.
+
+#### Adding a new REST operation class
+
+1. Create `src/salesforce_py/rest/operations/mynamespace.py` subclassing `RestBaseOperations`
+2. Each method calls `await self._get(path, ...)`, `_post`, `_patch`, `_put`, `_delete`, or `_get_bytes` with `params=` / `json=` / `headers=` kwargs
+3. Paths are relative to `/services/data/vXX.X/` — e.g. `"sobjects/Account/describe"`, not `"/services/data/v66.0/sobjects/Account/describe"`
+4. Export the class from `rest/operations/__init__.py` and wire it into `RestClient.__init__`
+
+See `src/salesforce_py/rest/README.md` for the full namespace map and usage examples.
 
 ### Connect REST API client (`salesforce_py/connect/`)
 
@@ -211,7 +242,7 @@ All exceptions live in `salesforce_py/exceptions.py`:
 `SalesforcePyError` (base) → `CLINotFoundError` (sf not on PATH) → `CLIError` (non-zero sf exit, carries `returncode`, `stdout`, `stderr`) → `AuthError` (OAuth / 401).
 
 - `CLIError` is raised by both `_runner.run` (async sf path) and `SFBaseOperations._run` (sync sf path).
-- `AuthError` is raised by `ConnectBaseOperations._handle_status`, `Data360BaseOperations._handle_status`, `ModelsBaseOperations._handle_status`, and `BulkBaseOperations._handle_status` on a 401 response, and by `salesforce_py.models.fetch_token` on 400/401 token-endpoint failures.
+- `AuthError` is raised by `RestBaseOperations._handle_status`, `ConnectBaseOperations._handle_status`, `Data360BaseOperations._handle_status`, `ModelsBaseOperations._handle_status`, and `BulkBaseOperations._handle_status` on a 401 response, and by `salesforce_py.models.fetch_token` on 400/401 token-endpoint failures.
 - `SalesforcePyError` covers everything else (non-JSON response, non-2xx status, timeouts, etc.).
 
 ## Utilities (`salesforce_py/utils/`)
@@ -229,23 +260,24 @@ Both are re-exported from `salesforce_py.utils`.
 - `data360` — `httpx[http2]`. Required for `salesforce_py.data360`. The package raises a helpful `ImportError` at import time if it is missing.
 - `models` — `httpx[http2]`. Required for `salesforce_py.models`. The package raises a helpful `ImportError` at import time if it is missing.
 - `bulk` — `httpx[http2]`, `aiofiles`, and `duckdb`. Required for `salesforce_py.bulk`; `duckdb` powers the client-side `ORDER BY` re-sort for query results.
-- `rest` — `httpx[http2]`, `pydantic`. Reserved for the future REST API module — `src/salesforce_py/rest/` currently contains only a package stub.
+- `rest` — `httpx[http2]`. Required for `salesforce_py.rest`. The package raises a helpful `ImportError` at import time if it is missing.
 - `code-analyzer` — `ruamel.yaml`, used by `SFCodeAnalyzerManager`. Import-guarded.
-- `all` — union of `httpx[http2]`, `pydantic`, `aiofiles`, `duckdb`, `ruamel.yaml`.
-- `dev` — `pytest`, `pytest-asyncio`, `pytest-cov`, `ruff`, `ty`, `httpx[http2]`, and `duckdb` (so the Connect + Data 360 + Models + Bulk tests run under `dev`).
+- `all` — union of `httpx[http2]`, `aiofiles`, `duckdb`, `ruamel.yaml`.
+- `dev` — `pytest`, `pytest-asyncio`, `pytest-cov`, `ruff`, `ty`, `httpx[http2]`, and `duckdb` (so the REST + Connect + Data 360 + Models + Bulk tests run under `dev`).
 
 ## Package layout
 
 - `src/salesforce_py/sf/` — SF CLI wrapper (sync + async)
+- `src/salesforce_py/rest/` — REST API client (async, httpx)
 - `src/salesforce_py/connect/` — Connect REST API client (async)
 - `src/salesforce_py/data360/` — Data 360 (CDP) Connect REST API client (async)
 - `src/salesforce_py/models/` — Einstein Models REST API client (async)
 - `src/salesforce_py/bulk/` — Bulk API 2.0 client (async, httpx + duckdb)
-- `src/salesforce_py/rest/` — future REST API client (stub)
 - `src/salesforce_py/utils/` — shared ID helpers + `utils/data/object_prefixes.json`
 - `src/salesforce_py/exceptions.py` — all exceptions
 - `src/salesforce_py/_defaults.py` — `DEFAULT_API_VERSION`
 - `tests/sf/` — SF CLI tests; `conftest.py` provides a `mock_runner` fixture patching `salesforce_py.sf._runner.run`
+- `tests/rest/` — REST API tests; fixtures patch `RestSession`'s underlying `httpx.AsyncClient` so individual tests assert on URL, params, and JSON payload
 - `tests/connect/` — Connect API tests; fixtures patch `ConnectSession`'s underlying `httpx.AsyncClient` so individual tests assert on URL, params, and JSON payload
 - `tests/data360/` — Data 360 API tests; same pattern as `tests/connect/`, patching the per-call session methods on `Data360Client`
 - `tests/models/` — Models API tests; same pattern as `tests/data360/`, patching session verbs on `ModelsClient`, plus mocked `httpx.AsyncClient` for the token helper
