@@ -72,9 +72,23 @@ class TestUploadData:
 
         client._session.put.assert_awaited_once()
         call = client._session.put.await_args
-        assert call.args[0] == "services/data/v66.0/jobs/ingest/750xx/batches"
+        # The session base already includes services/data/vXX.X/jobs/, so the
+        # API-qualified contentUrl is normalised to the relative path.
+        assert call.args[0] == "ingest/750xx/batches"
         assert call.kwargs["content"] == b"Id,Name\n001,Acme\n"
         assert call.kwargs["headers"]["Content-Type"] == "text/csv"
+        await client.close()
+
+    async def test_put_csv_accepts_absolute_content_url(self):
+        client = await make_client(mock_put=make_response(201))
+
+        await client.ingest.upload_data(
+            "750xx",
+            csv_data=b"a\n1\n",
+            content_url="/services/data/v66.0/jobs/ingest/750xx/batches",
+        )
+
+        assert client._session.put.await_args.args[0] == "ingest/750xx/batches"
         await client.close()
 
     async def test_put_csv_defaults_to_ingest_batches_path(self):
@@ -169,6 +183,8 @@ class TestUpsertConvenience:
         client._session.post.assert_awaited_once()
         client._session.put.assert_awaited_once()
         client._session.patch.assert_awaited_once()
-        # PUT should use the contentUrl returned by POST.
-        assert client._session.put.await_args.args[0] == post_body["contentUrl"]
+        # PUT uses the contentUrl from POST, normalised to drop the
+        # ``services/data/vXX.X/jobs/`` prefix already present in the
+        # session's base URL.
+        assert client._session.put.await_args.args[0] == "ingest/750xx/batches"
         await client.close()

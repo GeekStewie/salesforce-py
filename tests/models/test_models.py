@@ -346,14 +346,17 @@ class TestChatGenerations:
 
 
 class TestEmbeddings:
-    async def test_embed_single_string(self):
+    async def test_embed_single_string_wrapped_into_list(self):
+        """A scalar input is wrapped into a one-element list — the Models API
+        rejects non-array ``input`` with ``BAD_ARGUMENT``.
+        """
         c = await _client(mock_post=_mock_response(200, {"embeddings": []}))
         await c.embeddings.embed(OPENAI_ADA_002, "text")
         c._session.post.assert_awaited_once_with(
             f"models/{OPENAI_ADA_002}/embeddings",
             params=None,
             headers=None,
-            json={"input": "text"},
+            json={"input": ["text"]},
         )
         await c.close()
 

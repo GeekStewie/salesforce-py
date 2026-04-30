@@ -27,8 +27,30 @@ class ConnectBaseOperations:
         session: Open :class:`ConnectSession` instance.
     """
 
-    def __init__(self, session: ConnectSession) -> None:
+    def __init__(
+        self,
+        session: ConnectSession,
+        data_session: ConnectSession | None = None,
+    ) -> None:
         self._session = session
+        # Optional secondary session bound to ``/services/data/vXX.X/`` (no
+        # ``connect/`` prefix). Chatter-root endpoints (``/chatter/...``) live
+        # here, not under ``/connect/chatter/...``. When provided, calls whose
+        # path starts with ``chatter/`` are routed to this session.
+        self._data_session = data_session
+
+    def _route(self, path: str) -> ConnectSession:
+        """Return the session appropriate for ``path``.
+
+        Org-scope Chatter endpoints (``chatter/...``) must be addressed under
+        ``/services/data/vXX.X/chatter/...``, NOT ``/services/data/vXX.X/connect/chatter/...``.
+        When a ``data_session`` has been provided and the path starts with
+        ``chatter/``, we route there; otherwise we use the default Connect
+        session (connect-prefixed).
+        """
+        if self._data_session is not None and path.startswith("chatter/"):
+            return self._data_session
+        return self._session
 
     # ------------------------------------------------------------------
     # ID normalisation helpers
@@ -68,28 +90,34 @@ class ConnectBaseOperations:
     # ------------------------------------------------------------------
 
     async def _get(self, path: str, **kwargs: object) -> dict[str, Any]:
-        response = await retry_async_http_call(lambda: self._session.get(path, **kwargs))
+        sess = self._route(path)
+        response = await retry_async_http_call(lambda: sess.get(path, **kwargs))
         return self._handle(response)
 
     async def _get_bytes(self, path: str, **kwargs: object) -> bytes:
-        response = await retry_async_http_call(lambda: self._session.get(path, **kwargs))
+        sess = self._route(path)
+        response = await retry_async_http_call(lambda: sess.get(path, **kwargs))
         self._handle_status(response)
         return response.content
 
     async def _post(self, path: str, **kwargs: object) -> dict[str, Any]:
-        response = await retry_async_http_call(lambda: self._session.post(path, **kwargs))
+        sess = self._route(path)
+        response = await retry_async_http_call(lambda: sess.post(path, **kwargs))
         return self._handle(response)
 
     async def _patch(self, path: str, **kwargs: object) -> dict[str, Any]:
-        response = await retry_async_http_call(lambda: self._session.patch(path, **kwargs))
+        sess = self._route(path)
+        response = await retry_async_http_call(lambda: sess.patch(path, **kwargs))
         return self._handle(response)
 
     async def _put(self, path: str, **kwargs: object) -> dict[str, Any]:
-        response = await retry_async_http_call(lambda: self._session.put(path, **kwargs))
+        sess = self._route(path)
+        response = await retry_async_http_call(lambda: sess.put(path, **kwargs))
         return self._handle(response)
 
     async def _delete(self, path: str, **kwargs: object) -> dict[str, Any]:
-        response = await retry_async_http_call(lambda: self._session.delete(path, **kwargs))
+        sess = self._route(path)
+        response = await retry_async_http_call(lambda: sess.delete(path, **kwargs))
         return self._handle(response)
 
     # ------------------------------------------------------------------

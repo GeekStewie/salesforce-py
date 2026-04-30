@@ -25,15 +25,16 @@ class EmbeddingsOperations(ModelsBaseOperations):
         Args:
             model_name: API name of an embeddings-capable model, e.g.
                 ``"sfdc_ai__DefaultOpenAITextEmbeddingAda_002"``.
-            input: Single string or list of strings to embed. Sent as the
-                ``input`` property on the request body — a list lets the
-                server batch multiple inputs in one call.
+            input: Single string or list of strings to embed. A scalar is
+                wrapped into a one-element list — the Models API requires
+                ``input`` to be an array even for a single text.
             extra: Additional body properties merged into the request.
 
         Returns:
             Parsed JSON response with ``embeddings``, ``usage``, etc.
         """
-        body: dict[str, Any] = {"input": input}
+        payload_input = [input] if isinstance(input, str) else list(input)
+        body: dict[str, Any] = {"input": payload_input}
         if extra:
             body.update(extra)
         return await self._post(f"models/{model_name}/embeddings", json=body)

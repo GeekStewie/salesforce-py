@@ -215,18 +215,25 @@ class ConnectClient:
             base_path="",
             http2=http2,
         )
+        # Chatter-root endpoints (``/chatter/...``) are served at
+        # ``/services/data/vXX.X/chatter/...`` — NOT under ``/connect/chatter/...``.
+        # Operation classes that emit org-scope Chatter paths therefore receive
+        # the data-session too, and ``ConnectBaseOperations._route`` dispatches
+        # paths starting with ``chatter/`` to the data session while keeping
+        # everything else (``communities/X/...``, etc.) on the connect session.
+        ds = self._data_session
         self.core = ConnectCoreOperations(self._session)
         self.action_links = ActionLinksOperations(self._session)
         self.activity_reminders = ActivityRemindersOperations(self._session)
         self.agentforce_data_libraries = AgentforceDataLibrariesOperations(self._einstein_session)
-        self.announcements = AnnouncementsOperations(self._session)
+        self.announcements = AnnouncementsOperations(self._session, ds)
         self.bot_version_activation = BotVersionActivationOperations(self._session)
-        self.chatter = ChatterOperations(self._session)
+        self.chatter = ChatterOperations(self._session, ds)
         self.clean = CleanOperations(self._data_session)
         self.cms_content = CMSManagedContentOperations(self._session)
         self.cms_content_search = CMSContentSearchOperations(self._session)
         self.cms_workspaces = CMSWorkspacesOperations(self._session)
-        self.comments = CommentsOperations(self._session)
+        self.comments = CommentsOperations(self._session, ds)
         self.commerce_addresses = CommerceAddressesOperations(self._data_session)
         self.commerce_cart = CommerceCartOperations(self._data_session)
         self.commerce_checkout = CommerceCheckoutOperations(self._data_session)
@@ -247,14 +254,14 @@ class ConnectClient:
         self.duplicate = DuplicateOperations(self._data_session)
         self.einstein_recommendations = EinsteinRecommendationsOperations(self._session)
         self.email_merge_fields = EmailMergeFieldsOperations(self._data_session)
-        self.feeds = FeedsOperations(self._session)
-        self.files = FilesOperations(self._session)
+        self.feeds = FeedsOperations(self._session, ds)
+        self.files = FilesOperations(self._session, ds)
         self.flow_approval = FlowApprovalOperations(self._session)
-        self.groups = GroupsOperations(self._session)
+        self.groups = GroupsOperations(self._session, ds)
         self.knowledge_article_view_stat = KnowledgeArticleViewStatOperations(self._session)
-        self.likes = LikesOperations(self._session)
+        self.likes = LikesOperations(self._session, ds)
         self.managed_topics = ManagedTopicsOperations(self._session)
-        self.mentions = MentionsOperations(self._session)
+        self.mentions = MentionsOperations(self._session, ds)
         self.microsites = MicrositesOperations(self._data_session)
         self.motifs = MotifsOperations(self._session)
         self.named_credentials = NamedCredentialsOperations(self._data_session)
@@ -281,12 +288,12 @@ class ConnectClient:
         self.quip = QuipOperations(self._session)
         self.search = SearchOperations(self._session)
         self.sites_knowledge = SitesKnowledgeOperations(self._session)
-        self.sites_moderation = SitesModerationOperations(self._session)
-        self.subscriptions = SubscriptionsOperations(self._session)
-        self.topics = TopicsOperations(self._session)
+        self.sites_moderation = SitesModerationOperations(self._session, ds)
+        self.subscriptions = SubscriptionsOperations(self._session, ds)
+        self.topics = TopicsOperations(self._session, ds)
         self.topics_on_records = TopicsOnRecordsOperations(self._session)
         self.user_profiles = UserProfilesOperations(self._session)
-        self.users = UsersOperations(self._session)
+        self.users = UsersOperations(self._session, ds)
 
     # ------------------------------------------------------------------
     # Alternate constructors

@@ -14,6 +14,13 @@ class ChatterOperations(ConnectBaseOperations):
     All methods are async.
     """
 
+    # ------------------------------------------------------------------
+    # Feed items (feed-elements thin wrappers)
+    # ------------------------------------------------------------------
+    # The v36+ Chatter API replaced the ``feed-items`` resource with the
+    # more general ``feed-elements``. These methods keep the historic
+    # naming for backwards compatibility but address the modern endpoint.
+
     async def get_feed_items(
         self,
         *,
@@ -27,28 +34,28 @@ class ChatterOperations(ConnectBaseOperations):
             page_token: Opaque token returned by a previous call for pagination.
 
         Returns:
-            Feed items page dict with ``currentPageToken``, ``nextPageToken``,
-            and ``items`` keys.
+            Feed elements page dict with ``currentPageToken``, ``nextPageToken``,
+            and ``elements`` keys.
         """
         params: dict[str, Any] = {"pageSize": page_size}
         if page_token:
             params["pageToken"] = page_token
-        return await self._get("chatter/feeds/company/feed-items", params=params)
+        return await self._get("chatter/feeds/company/feed-elements", params=params)
 
     async def get_feed_item(self, feed_item_id: str) -> dict[str, Any]:
-        """Retrieve a single feed item by ID.
+        """Retrieve a single feed element by ID.
 
         Args:
-            feed_item_id: Salesforce ID of the feed item (15 or 18 characters).
+            feed_item_id: Salesforce ID of the feed element (15 or 18 characters).
 
         Returns:
-            Feed item dict.
+            Feed element dict.
         """
         feed_item_id = self._ensure_18(feed_item_id)
-        return await self._get(f"chatter/feed-items/{feed_item_id}")
+        return await self._get(f"chatter/feed-elements/{feed_item_id}")
 
     async def post_feed_item(self, body: str, *, subject_id: str = "me") -> dict[str, Any]:
-        """Post a text feed item.
+        """Post a text feed element.
 
         Args:
             body: Plain-text message body.
@@ -56,7 +63,7 @@ class ChatterOperations(ConnectBaseOperations):
                 or ``"me"`` for the authenticated user's feed.
 
         Returns:
-            Created feed item dict.
+            Created feed element dict.
         """
         subject_id = self._ensure_18(subject_id)
         payload = {
@@ -64,37 +71,37 @@ class ChatterOperations(ConnectBaseOperations):
             "feedElementType": "FeedItem",
             "subjectId": subject_id,
         }
-        return await self._post("chatter/feed-items", json=payload)
+        return await self._post("chatter/feed-elements", json=payload)
 
     async def delete_feed_item(self, feed_item_id: str) -> dict[str, Any]:
-        """Delete a feed item.
+        """Delete a feed element.
 
         Args:
-            feed_item_id: Salesforce ID of the feed item (15 or 18 characters).
+            feed_item_id: Salesforce ID of the feed element (15 or 18 characters).
 
         Returns:
             Empty dict on success.
         """
         feed_item_id = self._ensure_18(feed_item_id)
-        return await self._delete(f"chatter/feed-items/{feed_item_id}")
+        return await self._delete(f"chatter/feed-elements/{feed_item_id}")
 
     async def get_comments(self, feed_item_id: str) -> dict[str, Any]:
-        """Retrieve comments on a feed item.
+        """Retrieve comments on a feed element.
 
         Args:
-            feed_item_id: Salesforce ID of the feed item (15 or 18 characters).
+            feed_item_id: Salesforce ID of the feed element (15 or 18 characters).
 
         Returns:
             Comments page dict.
         """
         feed_item_id = self._ensure_18(feed_item_id)
-        return await self._get(f"chatter/feed-items/{feed_item_id}/comments")
+        return await self._get(f"chatter/feed-elements/{feed_item_id}/capabilities/comments/items")
 
     async def post_comment(self, feed_item_id: str, body: str) -> dict[str, Any]:
-        """Add a comment to a feed item.
+        """Add a comment to a feed element.
 
         Args:
-            feed_item_id: Salesforce ID of the feed item (15 or 18 characters).
+            feed_item_id: Salesforce ID of the feed element (15 or 18 characters).
             body: Plain-text comment body.
 
         Returns:
@@ -102,7 +109,9 @@ class ChatterOperations(ConnectBaseOperations):
         """
         feed_item_id = self._ensure_18(feed_item_id)
         payload = {"body": {"messageSegments": [{"type": "Text", "text": body}]}}
-        return await self._post(f"chatter/feed-items/{feed_item_id}/comments", json=payload)
+        return await self._post(
+            f"chatter/feed-elements/{feed_item_id}/capabilities/comments/items", json=payload
+        )
 
     # ------------------------------------------------------------------
     # Feed elements  /chatter/feed-elements

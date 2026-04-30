@@ -106,16 +106,37 @@ class IngestOperations(BulkBaseOperations):
             csv_data: Raw CSV bytes, not base64-encoded. Must not exceed
                 ``MAX_UPLOAD_BYTES_RAW`` (100 MB) — validated client-side
                 because the server applies its 150 MB cap post-base64.
-            content_url: Optional override for the upload path. When
-                omitted, defaults to ``ingest/{job_id}/batches``.
+            content_url: Optional upload path. When omitted, defaults to
+                ``ingest/{job_id}/batches``. If passed (typically the
+                ``contentUrl`` returned by :meth:`create_job`), any
+                ``services/data/vXX.X/jobs/`` prefix is stripped so the
+                final URL is not double-prefixed by the session's base path.
 
         Raises:
             ValueError: If *csv_data* exceeds the raw upload ceiling.
             SalesforcePyError: On non-201 response.
         """
         validate_upload_size(csv_data)
-        path = content_url or f"ingest/{job_id}/batches"
+        path = (
+            self._normalize_content_url(content_url) if content_url else f"ingest/{job_id}/batches"
+        )
         await self._put_csv(path, data=csv_data)
+
+    @staticmethod
+    def _normalize_content_url(content_url: str) -> str:
+        """Strip the ``services/data/vXX.X/jobs/`` prefix if present.
+
+        Salesforce returns ``contentUrl`` as the full API-version-qualified
+        path (e.g. ``services/data/v66.0/jobs/ingest/<id>/batches``), but
+        the Bulk session's base URL already includes that prefix. Passing
+        the raw ``contentUrl`` back would double-prefix the final URL.
+        """
+        trimmed = content_url.lstrip("/")
+        marker = "jobs/"
+        idx = trimmed.rfind(marker)
+        if idx != -1:
+            return trimmed[idx + len(marker) :]
+        return trimmed
 
     async def upload_complete(self, job_id: str) -> dict[str, Any]:
         """Mark an ingest job's upload as finished, moving it to ``UploadComplete``.

@@ -103,16 +103,27 @@ def _mock_response(
 async def _client(mock_get=None, mock_post=None, mock_patch=None, mock_put=None, mock_delete=None):
     c = ConnectClient(INSTANCE_URL, ACCESS_TOKEN)
     await c.open()
-    if mock_get is not None:
-        c._session.get = AsyncMock(return_value=mock_get)
-    if mock_post is not None:
-        c._session.post = AsyncMock(return_value=mock_post)
-    if mock_patch is not None:
-        c._session.patch = AsyncMock(return_value=mock_patch)
-    if mock_put is not None:
-        c._session.put = AsyncMock(return_value=mock_put)
-    if mock_delete is not None:
-        c._session.delete = AsyncMock(return_value=mock_delete)
+    # Share ONE AsyncMock instance between the primary and data sessions so
+    # ``call_args`` lookups via ``c._session.get.call_args`` still resolve
+    # regardless of which session ``ConnectBaseOperations._route`` dispatched
+    # to. Chatter-prefixed paths route to ``_data_session``; everything else
+    # routes to ``_session``.
+    m_get = AsyncMock(return_value=mock_get) if mock_get is not None else None
+    m_post = AsyncMock(return_value=mock_post) if mock_post is not None else None
+    m_patch = AsyncMock(return_value=mock_patch) if mock_patch is not None else None
+    m_put = AsyncMock(return_value=mock_put) if mock_put is not None else None
+    m_delete = AsyncMock(return_value=mock_delete) if mock_delete is not None else None
+    for sess in (c._session, c._data_session):
+        if m_get is not None:
+            sess.get = m_get
+        if m_post is not None:
+            sess.post = m_post
+        if m_patch is not None:
+            sess.patch = m_patch
+        if m_put is not None:
+            sess.put = m_put
+        if m_delete is not None:
+            sess.delete = m_delete
     return c
 
 
@@ -250,6 +261,9 @@ class TestConnectClientLifecycle:
 
 
 class TestConnectRetry:
+    # ``chatter.get_feed_items`` emits a path starting with ``chatter/`` which
+    # ``ConnectBaseOperations._route`` dispatches to ``_data_session`` (bound
+    # to ``/services/data/vXX.X/`` with no ``connect/`` prefix).
     async def test_get_retries_once_on_transient_status(self, monkeypatch):
         """A 503 on the first call is retried once, then the 200 body is returned."""
         import salesforce_py._retry as retry_mod
@@ -259,12 +273,14 @@ class TestConnectRetry:
         body = {"items": []}
         c = ConnectClient(INSTANCE_URL, ACCESS_TOKEN)
         await c.open()
-        c._session.get = AsyncMock(side_effect=[_mock_response(503), _mock_response(200, body)])
+        c._data_session.get = AsyncMock(
+            side_effect=[_mock_response(503), _mock_response(200, body)]
+        )
 
         result = await c.chatter.get_feed_items()
 
         assert result == body
-        assert c._session.get.call_count == 2
+        assert c._data_session.get.call_count == 2
         await c.close()
 
     async def test_get_retries_once_on_420(self, monkeypatch):
@@ -276,12 +292,14 @@ class TestConnectRetry:
         body = {"items": []}
         c = ConnectClient(INSTANCE_URL, ACCESS_TOKEN)
         await c.open()
-        c._session.get = AsyncMock(side_effect=[_mock_response(420), _mock_response(200, body)])
+        c._data_session.get = AsyncMock(
+            side_effect=[_mock_response(420), _mock_response(200, body)]
+        )
 
         result = await c.chatter.get_feed_items()
 
         assert result == body
-        assert c._session.get.call_count == 2
+        assert c._data_session.get.call_count == 2
         await c.close()
 
     async def test_final_transient_surfaces_as_salesforcepyerror(self, monkeypatch):
@@ -292,12 +310,14 @@ class TestConnectRetry:
 
         c = ConnectClient(INSTANCE_URL, ACCESS_TOKEN)
         await c.open()
-        c._session.get = AsyncMock(side_effect=[_mock_response(503), _mock_response(503)])
+        c._data_session.get = AsyncMock(
+            side_effect=[_mock_response(503), _mock_response(503)]
+        )
 
         with pytest.raises(SalesforcePyError):
             await c.chatter.get_feed_items()
 
-        assert c._session.get.call_count == 2
+        assert c._data_session.get.call_count == 2
         await c.close()
 
     async def test_no_retry_on_401(self, monkeypatch):
@@ -308,12 +328,12 @@ class TestConnectRetry:
 
         c = ConnectClient(INSTANCE_URL, ACCESS_TOKEN)
         await c.open()
-        c._session.get = AsyncMock(return_value=_mock_response(401))
+        c._data_session.get = AsyncMock(return_value=_mock_response(401))
 
         with pytest.raises(AuthError):
             await c.chatter.get_feed_items()
 
-        assert c._session.get.call_count == 1
+        assert c._data_session.get.call_count == 1
         await c.close()
 
 
