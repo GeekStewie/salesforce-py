@@ -90,9 +90,7 @@ class SObjectsOperations(RestBaseOperations):
         """Return page layouts from ``/sobjects/Global/describe/layouts``."""
         return await self._get("sobjects/Global/describe/layouts")
 
-    async def describe_named_layout(
-        self, object_name: str, layout_name: str
-    ) -> dict[str, Any]:
+    async def describe_named_layout(self, object_name: str, layout_name: str) -> dict[str, Any]:
         """Return an alternate named layout for an sObject."""
         return await self._get(f"sobjects/{object_name}/describe/namedLayouts/{layout_name}")
 
@@ -107,9 +105,7 @@ class SObjectsOperations(RestBaseOperations):
     # Record CRUD
     # ------------------------------------------------------------------
 
-    async def create(
-        self, object_name: str, record: dict[str, Any]
-    ) -> dict[str, Any]:
+    async def create(self, object_name: str, record: dict[str, Any]) -> dict[str, Any]:
         """Create a new record.
 
         Args:
@@ -221,17 +217,11 @@ class SObjectsOperations(RestBaseOperations):
         self, object_name: str, record_id: str, relationship_name: str
     ) -> dict[str, Any]:
         """Delete the record associated with a lookup/master-detail field."""
-        return await self._delete(
-            f"sobjects/{object_name}/{record_id}/{relationship_name}"
-        )
+        return await self._delete(f"sobjects/{object_name}/{record_id}/{relationship_name}")
 
-    async def get_blob(
-        self, object_name: str, record_id: str, blob_field: str
-    ) -> bytes:
+    async def get_blob(self, object_name: str, record_id: str, blob_field: str) -> bytes:
         """Download a blob field (Attachment body, ContentVersion version data, etc.)."""
-        return await self._get_bytes(
-            f"sobjects/{object_name}/{record_id}/{blob_field}"
-        )
+        return await self._get_bytes(f"sobjects/{object_name}/{record_id}/{blob_field}")
 
     async def get_rich_text_image(
         self,
@@ -250,9 +240,7 @@ class SObjectsOperations(RestBaseOperations):
     # Change feeds
     # ------------------------------------------------------------------
 
-    async def get_deleted(
-        self, object_name: str, *, start: str, end: str
-    ) -> dict[str, Any]:
+    async def get_deleted(self, object_name: str, *, start: str, end: str) -> dict[str, Any]:
         """Return records of a given type deleted between *start* and *end*.
 
         Args:
@@ -265,9 +253,7 @@ class SObjectsOperations(RestBaseOperations):
             params={"start": start, "end": end},
         )
 
-    async def get_updated(
-        self, object_name: str, *, start: str, end: str
-    ) -> dict[str, Any]:
+    async def get_updated(self, object_name: str, *, start: str, end: str) -> dict[str, Any]:
         """Return IDs of records of a given type updated between *start* and *end*."""
         return await self._get(
             f"sobjects/{object_name}/updated",
@@ -302,13 +288,9 @@ class SObjectsOperations(RestBaseOperations):
             params={"limit": limit, "offset": offset, "q": q},
         )
 
-    async def describe_list_view(
-        self, object_name: str, query_locator: str
-    ) -> dict[str, Any]:
+    async def describe_list_view(self, object_name: str, query_locator: str) -> dict[str, Any]:
         """Return the detailed definition of a list view (columns + SOQL)."""
-        return await self._get(
-            f"sobjects/{object_name}/listviews/{query_locator}/describe"
-        )
+        return await self._get(f"sobjects/{object_name}/listviews/{query_locator}/describe")
 
     async def recent_list_views(self, object_name: str) -> dict[str, Any]:
         """Return the recently used list views for an object."""
@@ -425,9 +407,7 @@ class SObjectsOperations(RestBaseOperations):
         """Return a user password's expiration status."""
         return await self._get(f"sobjects/User/{user_id}/password")
 
-    async def set_user_password(
-        self, user_id: str, new_password: str
-    ) -> dict[str, Any]:
+    async def set_user_password(self, user_id: str, new_password: str) -> dict[str, Any]:
         """Set a user's password."""
         return await self._post(
             f"sobjects/User/{user_id}/password",
@@ -442,9 +422,7 @@ class SObjectsOperations(RestBaseOperations):
         self, self_service_user_id: str
     ) -> dict[str, Any]:
         """Return a self-service user password's expiration status."""
-        return await self._get(
-            f"sobjects/SelfServiceUser/{self_service_user_id}/password"
-        )
+        return await self._get(f"sobjects/SelfServiceUser/{self_service_user_id}/password")
 
     async def set_self_service_user_password(
         self, self_service_user_id: str, new_password: str
@@ -455,10 +433,6 @@ class SObjectsOperations(RestBaseOperations):
             json={"NewPassword": new_password},
         )
 
-    async def reset_self_service_user_password(
-        self, self_service_user_id: str
-    ) -> dict[str, Any]:
+    async def reset_self_service_user_password(self, self_service_user_id: str) -> dict[str, Any]:
         """Initiate a self-service user password reset."""
-        return await self._delete(
-            f"sobjects/SelfServiceUser/{self_service_user_id}/password"
-        )
+        return await self._delete(f"sobjects/SelfServiceUser/{self_service_user_id}/password")

@@ -19,9 +19,7 @@ class MetadataOperations(RestBaseOperations):
         """Return the list of metadata resources available for this version."""
         return await self._get("metadata")
 
-    async def get(
-        self, subpath: str, *, params: dict[str, Any] | None = None
-    ) -> dict[str, Any]:
+    async def get(self, subpath: str, *, params: dict[str, Any] | None = None) -> dict[str, Any]:
         """Issue a GET against ``/metadata/{subpath}``."""
         return await self._get(f"metadata/{subpath.lstrip('/')}", params=params)
 
@@ -33,9 +31,7 @@ class MetadataOperations(RestBaseOperations):
         params: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Issue a POST against ``/metadata/{subpath}``."""
-        return await self._post(
-            f"metadata/{subpath.lstrip('/')}", json=json, params=params
-        )
+        return await self._post(f"metadata/{subpath.lstrip('/')}", json=json, params=params)
 
     async def patch(
         self,
@@ -45,9 +41,7 @@ class MetadataOperations(RestBaseOperations):
         params: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Issue a PATCH against ``/metadata/{subpath}``."""
-        return await self._patch(
-            f"metadata/{subpath.lstrip('/')}", json=json, params=params
-        )
+        return await self._patch(f"metadata/{subpath.lstrip('/')}", json=json, params=params)
 
     async def put(
         self,
@@ -57,14 +51,8 @@ class MetadataOperations(RestBaseOperations):
         params: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Issue a PUT against ``/metadata/{subpath}``."""
-        return await self._put(
-            f"metadata/{subpath.lstrip('/')}", json=json, params=params
-        )
+        return await self._put(f"metadata/{subpath.lstrip('/')}", json=json, params=params)
 
-    async def delete(
-        self, subpath: str, *, params: dict[str, Any] | None = None
-    ) -> dict[str, Any]:
+    async def delete(self, subpath: str, *, params: dict[str, Any] | None = None) -> dict[str, Any]:
         """Issue a DELETE against ``/metadata/{subpath}``."""
-        return await self._delete(
-            f"metadata/{subpath.lstrip('/')}", params=params
-        )
+        return await self._delete(f"metadata/{subpath.lstrip('/')}", params=params)

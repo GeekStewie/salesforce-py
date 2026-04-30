@@ -57,6 +57,4 @@ class QuickActionsOperations(RestBaseOperations):
             payload["contextId"] = context_id
         if record is not None:
             payload["record"] = record
-        return await self._post(
-            f"quickActions/{action_name}", json=payload or None
-        )
+        return await self._post(f"quickActions/{action_name}", json=payload or None)

@@ -36,25 +36,17 @@ class SupportOperations(RestBaseOperations):
             params={"sObjectName": sobject, "topCategoriesOnly": top_categories_only},
         )
 
-    async def get_data_category(
-        self, group: str, category: str
-    ) -> dict[str, Any]:
+    async def get_data_category(self, group: str, category: str) -> dict[str, Any]:
         """Return a data category and its child categories."""
-        return await self._get(
-            f"support/dataCategoryGroups/{group}/dataCategories/{category}"
-        )
+        return await self._get(f"support/dataCategoryGroups/{group}/dataCategories/{category}")
 
     # ------------------------------------------------------------------
     # Embedded Service
     # ------------------------------------------------------------------
 
-    async def get_embedded_service_configuration(
-        self, service_name: str
-    ) -> dict[str, Any]:
+    async def get_embedded_service_configuration(self, service_name: str) -> dict[str, Any]:
         """Return metadata for an Embedded Service deployment."""
-        return await self._get(
-            f"support/embeddedservice/configuration/{service_name}"
-        )
+        return await self._get(f"support/embeddedservice/configuration/{service_name}")
 
     # ------------------------------------------------------------------
     # Field Service
@@ -71,11 +63,7 @@ class SupportOperations(RestBaseOperations):
         """
         return await self._get(
             "support/fieldservice/Flow",
-            params={
-                "developerNames": ",".join(developer_names)
-                if developer_names
-                else None
-            },
+            params={"developerNames": ",".join(developer_names) if developer_names else None},
         )
 
     async def get_field_service_report_templates(
@@ -84,25 +72,17 @@ class SupportOperations(RestBaseOperations):
         """Return metadata for Field Service service report templates."""
         return await self._get(
             "support/fieldservice/ServiceReportTemplate",
-            params={
-                "developerNames": ",".join(developer_names)
-                if developer_names
-                else None
-            },
+            params={"developerNames": ",".join(developer_names) if developer_names else None},
         )
 
     # ------------------------------------------------------------------
     # Knowledge articles
     # ------------------------------------------------------------------
 
-    async def get_knowledge_article(
-        self, article_id_or_url_name: str
-    ) -> dict[str, Any]:
+    async def get_knowledge_article(self, article_id_or_url_name: str) -> dict[str, Any]:
         """Return online Knowledge article fields accessible to the user.
 
         Args:
             article_id_or_url_name: Article ID (``kaXXX...``) or URL name.
         """
-        return await self._get(
-            f"support/knowledgeArticles/{article_id_or_url_name}"
-        )
+        return await self._get(f"support/knowledgeArticles/{article_id_or_url_name}")

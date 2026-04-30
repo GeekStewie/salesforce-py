@@ -52,9 +52,7 @@ class UIAPIOperations(RestBaseOperations):
             params={
                 "layoutTypes": ",".join(layout_types) if layout_types else None,
                 "modes": ",".join(modes) if modes else None,
-                "optionalFields": ",".join(optional_fields)
-                if optional_fields
-                else None,
+                "optionalFields": ",".join(optional_fields) if optional_fields else None,
             },
         )
 
@@ -118,9 +116,7 @@ class UIAPIOperations(RestBaseOperations):
     # Generic passthrough
     # ------------------------------------------------------------------
 
-    async def get(
-        self, subpath: str, *, params: dict[str, Any] | None = None
-    ) -> dict[str, Any]:
+    async def get(self, subpath: str, *, params: dict[str, Any] | None = None) -> dict[str, Any]:
         """Issue a GET against ``/ui-api/{subpath}``."""
         return await self._get(f"ui-api/{subpath.lstrip('/')}", params=params)
 
@@ -132,9 +128,7 @@ class UIAPIOperations(RestBaseOperations):
         params: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Issue a POST against ``/ui-api/{subpath}``."""
-        return await self._post(
-            f"ui-api/{subpath.lstrip('/')}", json=json, params=params
-        )
+        return await self._post(f"ui-api/{subpath.lstrip('/')}", json=json, params=params)
 
     async def patch(
         self,
@@ -144,9 +138,7 @@ class UIAPIOperations(RestBaseOperations):
         params: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Issue a PATCH against ``/ui-api/{subpath}``."""
-        return await self._patch(
-            f"ui-api/{subpath.lstrip('/')}", json=json, params=params
-        )
+        return await self._patch(f"ui-api/{subpath.lstrip('/')}", json=json, params=params)
 
     async def put(
         self,
@@ -156,14 +148,8 @@ class UIAPIOperations(RestBaseOperations):
         params: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Issue a PUT against ``/ui-api/{subpath}``."""
-        return await self._put(
-            f"ui-api/{subpath.lstrip('/')}", json=json, params=params
-        )
+        return await self._put(f"ui-api/{subpath.lstrip('/')}", json=json, params=params)
 
-    async def delete(
-        self, subpath: str, *, params: dict[str, Any] | None = None
-    ) -> dict[str, Any]:
+    async def delete(self, subpath: str, *, params: dict[str, Any] | None = None) -> dict[str, Any]:
         """Issue a DELETE against ``/ui-api/{subpath}``."""
-        return await self._delete(
-            f"ui-api/{subpath.lstrip('/')}", params=params
-        )
+        return await self._delete(f"ui-api/{subpath.lstrip('/')}", params=params)

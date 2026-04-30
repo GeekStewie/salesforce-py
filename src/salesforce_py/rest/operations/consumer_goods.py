@@ -31,8 +31,6 @@ class ConsumerGoodsOperations(RestBaseOperations):
         """Return visit recommendations for the context user."""
         return await self._get("connect/visit/recommendations", params=params)
 
-    async def post_visit_recommendations(
-        self, body: dict[str, Any]
-    ) -> dict[str, Any]:
+    async def post_visit_recommendations(self, body: dict[str, Any]) -> dict[str, Any]:
         """Submit a visit recommendation request body."""
         return await self._post("connect/visit/recommendations", json=body)

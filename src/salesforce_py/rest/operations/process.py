@@ -33,9 +33,7 @@ class ProcessOperations(RestBaseOperations):
         ``Approve``, ``Reject``), ``contextId``, ``comments``,
         ``nextApproverIds``, and optionally ``processDefinitionNameOrId``.
         """
-        return await self._post(
-            "process/approvals", json={"requests": requests}
-        )
+        return await self._post("process/approvals", json={"requests": requests})
 
     # ------------------------------------------------------------------
     # Workflow rules
@@ -55,6 +53,4 @@ class ProcessOperations(RestBaseOperations):
 
     async def trigger_rules(self, context_ids: list[str]) -> dict[str, Any]:
         """Trigger all active workflow rules for the specified record IDs."""
-        return await self._post(
-            "process/rules", json={"contextIds": context_ids}
-        )
+        return await self._post("process/rules", json={"contextIds": context_ids})

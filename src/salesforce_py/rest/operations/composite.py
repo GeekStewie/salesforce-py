@@ -104,13 +104,9 @@ class CompositeOperations(RestBaseOperations):
     # Composite tree (nested parent/child creation)
     # ------------------------------------------------------------------
 
-    async def tree(
-        self, object_name: str, records: list[dict[str, Any]]
-    ) -> dict[str, Any]:
+    async def tree(self, object_name: str, records: list[dict[str, Any]]) -> dict[str, Any]:
         """Create one or more sObject trees rooted at *object_name*."""
-        return await self._post(
-            f"composite/tree/{object_name}", json={"records": records}
-        )
+        return await self._post(f"composite/tree/{object_name}", json={"records": records})
 
     # ------------------------------------------------------------------
     # Composite sObject collections

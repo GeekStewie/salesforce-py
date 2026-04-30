@@ -50,9 +50,7 @@ class AnalyticsOperations(RestBaseOperations):
         params: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Issue a POST against ``/analytics/{subpath}``."""
-        return await self._post(
-            f"analytics/{subpath.lstrip('/')}", json=json, params=params
-        )
+        return await self._post(f"analytics/{subpath.lstrip('/')}", json=json, params=params)
 
     async def patch(
         self,
@@ -62,9 +60,7 @@ class AnalyticsOperations(RestBaseOperations):
         params: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Issue a PATCH against ``/analytics/{subpath}``."""
-        return await self._patch(
-            f"analytics/{subpath.lstrip('/')}", json=json, params=params
-        )
+        return await self._patch(f"analytics/{subpath.lstrip('/')}", json=json, params=params)
 
     async def put(
         self,
@@ -74,17 +70,11 @@ class AnalyticsOperations(RestBaseOperations):
         params: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Issue a PUT against ``/analytics/{subpath}``."""
-        return await self._put(
-            f"analytics/{subpath.lstrip('/')}", json=json, params=params
-        )
+        return await self._put(f"analytics/{subpath.lstrip('/')}", json=json, params=params)
 
-    async def delete(
-        self, subpath: str, *, params: dict[str, Any] | None = None
-    ) -> dict[str, Any]:
+    async def delete(self, subpath: str, *, params: dict[str, Any] | None = None) -> dict[str, Any]:
         """Issue a DELETE against ``/analytics/{subpath}``."""
-        return await self._delete(
-            f"analytics/{subpath.lstrip('/')}", params=params
-        )
+        return await self._delete(f"analytics/{subpath.lstrip('/')}", params=params)
 
 
 class FoldersOperations(RestBaseOperations):
@@ -99,9 +89,7 @@ class FoldersOperations(RestBaseOperations):
             folder_type: Filter by folder type (``report``, ``dashboard``).
             page_token: Continuation token from a previous page.
         """
-        return await self._get(
-            "folders", params={"type": folder_type, "page": page_token}
-        )
+        return await self._get("folders", params={"type": folder_type, "page": page_token})
 
     async def get_folder(self, folder_id: str) -> dict[str, Any]:
         """Return metadata for a specific folder."""
@@ -111,9 +99,7 @@ class FoldersOperations(RestBaseOperations):
         """Create a new analytics folder."""
         return await self._post("folders", json=folder)
 
-    async def update_folder(
-        self, folder_id: str, folder: dict[str, Any]
-    ) -> dict[str, Any]:
+    async def update_folder(self, folder_id: str, folder: dict[str, Any]) -> dict[str, Any]:
         """Update an existing analytics folder."""
         return await self._patch(f"folders/{folder_id}", json=folder)
 
@@ -144,9 +130,7 @@ class WaveOperations(RestBaseOperations):
         params: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Issue a POST against ``/wave/{subpath}``."""
-        return await self._post(
-            f"wave/{subpath.lstrip('/')}", json=json, params=params
-        )
+        return await self._post(f"wave/{subpath.lstrip('/')}", json=json, params=params)
 
     async def patch(
         self,
@@ -156,9 +140,7 @@ class WaveOperations(RestBaseOperations):
         params: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Issue a PATCH against ``/wave/{subpath}``."""
-        return await self._patch(
-            f"wave/{subpath.lstrip('/')}", json=json, params=params
-        )
+        return await self._patch(f"wave/{subpath.lstrip('/')}", json=json, params=params)
 
     async def put(
         self,
@@ -170,9 +152,7 @@ class WaveOperations(RestBaseOperations):
         """Issue a PUT against ``/wave/{subpath}``."""
         return await self._put(f"wave/{subpath.lstrip('/')}", json=json, params=params)
 
-    async def delete(
-        self, subpath: str, *, params: dict[str, Any] | None = None
-    ) -> dict[str, Any]:
+    async def delete(self, subpath: str, *, params: dict[str, Any] | None = None) -> dict[str, Any]:
         """Issue a DELETE against ``/wave/{subpath}``."""
         return await self._delete(f"wave/{subpath.lstrip('/')}", params=params)
 
@@ -184,11 +164,7 @@ class SmartDataDiscoveryOperations(RestBaseOperations):
         self, subpath: str = "", *, params: dict[str, Any] | None = None
     ) -> dict[str, Any]:
         """Issue a GET against ``/smartdatadiscovery/{subpath}``."""
-        path = (
-            "smartdatadiscovery"
-            if not subpath
-            else f"smartdatadiscovery/{subpath.lstrip('/')}"
-        )
+        path = "smartdatadiscovery" if not subpath else f"smartdatadiscovery/{subpath.lstrip('/')}"
         return await self._get(path, params=params)
 
     async def post(

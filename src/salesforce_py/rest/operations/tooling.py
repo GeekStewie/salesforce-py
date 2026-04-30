@@ -45,13 +45,9 @@ class ToolingOperations(RestBaseOperations):
 
     async def execute_anonymous(self, anonymous_body: str) -> dict[str, Any]:
         """Run Apex anonymously via ``/tooling/executeAnonymous``."""
-        return await self._get(
-            "tooling/executeAnonymous", params={"anonymousBody": anonymous_body}
-        )
+        return await self._get("tooling/executeAnonymous", params={"anonymousBody": anonymous_body})
 
-    async def run_tests_asynchronous(
-        self, body: dict[str, Any]
-    ) -> dict[str, Any]:
+    async def run_tests_asynchronous(self, body: dict[str, Any]) -> dict[str, Any]:
         """Submit Apex tests for asynchronous execution."""
         return await self._post("tooling/runTestsAsynchronous", json=body)
 
@@ -63,9 +59,7 @@ class ToolingOperations(RestBaseOperations):
     # Generic passthrough
     # ------------------------------------------------------------------
 
-    async def get(
-        self, subpath: str, *, params: dict[str, Any] | None = None
-    ) -> dict[str, Any]:
+    async def get(self, subpath: str, *, params: dict[str, Any] | None = None) -> dict[str, Any]:
         """Issue a GET against ``/tooling/{subpath}``."""
         return await self._get(f"tooling/{subpath.lstrip('/')}", params=params)
 
@@ -77,9 +71,7 @@ class ToolingOperations(RestBaseOperations):
         params: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Issue a POST against ``/tooling/{subpath}``."""
-        return await self._post(
-            f"tooling/{subpath.lstrip('/')}", json=json, params=params
-        )
+        return await self._post(f"tooling/{subpath.lstrip('/')}", json=json, params=params)
 
     async def patch(
         self,
@@ -89,9 +81,7 @@ class ToolingOperations(RestBaseOperations):
         params: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Issue a PATCH against ``/tooling/{subpath}``."""
-        return await self._patch(
-            f"tooling/{subpath.lstrip('/')}", json=json, params=params
-        )
+        return await self._patch(f"tooling/{subpath.lstrip('/')}", json=json, params=params)
 
     async def put(
         self,
@@ -101,14 +91,8 @@ class ToolingOperations(RestBaseOperations):
         params: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Issue a PUT against ``/tooling/{subpath}``."""
-        return await self._put(
-            f"tooling/{subpath.lstrip('/')}", json=json, params=params
-        )
+        return await self._put(f"tooling/{subpath.lstrip('/')}", json=json, params=params)
 
-    async def delete(
-        self, subpath: str, *, params: dict[str, Any] | None = None
-    ) -> dict[str, Any]:
+    async def delete(self, subpath: str, *, params: dict[str, Any] | None = None) -> dict[str, Any]:
         """Issue a DELETE against ``/tooling/{subpath}``."""
-        return await self._delete(
-            f"tooling/{subpath.lstrip('/')}", params=params
-        )
+        return await self._delete(f"tooling/{subpath.lstrip('/')}", params=params)

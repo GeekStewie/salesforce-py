@@ -47,9 +47,7 @@ class ActionsOperations(RestBaseOperations):
             action_name: Action API name, e.g. ``chatterPost``, ``emailSimple``.
             inputs: List of input dicts — one per invocation.
         """
-        return await self._post(
-            f"actions/standard/{action_name}", json={"inputs": inputs}
-        )
+        return await self._post(f"actions/standard/{action_name}", json={"inputs": inputs})
 
     # ------------------------------------------------------------------
     # Custom actions
@@ -63,9 +61,7 @@ class ActionsOperations(RestBaseOperations):
         """List custom actions of a specific type (``apex``, ``flow``, ``emailAlert``, etc.)."""
         return await self._get(f"actions/custom/{action_type}")
 
-    async def describe_custom_action(
-        self, action_type: str, action_name: str
-    ) -> dict[str, Any]:
+    async def describe_custom_action(self, action_type: str, action_name: str) -> dict[str, Any]:
         """Return metadata for a custom invocable action."""
         return await self._get(f"actions/custom/{action_type}/{action_name}")
 

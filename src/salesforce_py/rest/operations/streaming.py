@@ -23,9 +23,7 @@ class StreamingChannelPushOperations(RestBaseOperations):
         """Return subscriber information for a streaming channel."""
         return await self._get(f"sobjects/StreamingChannel/{channel_id}/push")
 
-    async def push_notification(
-        self, channel_id: str, payload: dict[str, Any]
-    ) -> dict[str, Any]:
+    async def push_notification(self, channel_id: str, payload: dict[str, Any]) -> dict[str, Any]:
         """Push a generic streaming notification to a streaming channel."""
         return await self._post(
             f"sobjects/StreamingChannel/{channel_id}/push",
