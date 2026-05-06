@@ -91,6 +91,12 @@ from salesforce_py.connect.operations.knowledge import (
     KnowledgeArticleViewStatOperations,
 )
 from salesforce_py.connect.operations.managed_topics import ManagedTopicsOperations
+from salesforce_py.industries.manufacturing import (
+    SalesAgreementsOperations,
+    SampleManagementOperations,
+    TransformationsOperations,
+    WarrantyOperations,
+)
 from salesforce_py.connect.operations.microsites import MicrositesOperations
 from salesforce_py.connect.operations.motifs import MotifsOperations
 from salesforce_py.connect.operations.named_credentials import (
@@ -157,6 +163,21 @@ from salesforce_py.connect.operations.users import (
     UserProfilesOperations,
     UsersOperations,
 )
+
+
+class _ManufacturingNamespace:
+    """Container exposing manufacturing-cloud Connect API operations.
+
+    Grouped semantically; ``warranty.supplier_claim`` hits
+    ``/connect/warranty/``, not ``/connect/manufacturing/``, despite living
+    under this accessor.
+    """
+
+    def __init__(self, session: ConnectSession) -> None:
+        self.sales_agreements = SalesAgreementsOperations(session)
+        self.sample_management = SampleManagementOperations(session)
+        self.transformations = TransformationsOperations(session)
+        self.warranty = WarrantyOperations(session)
 
 
 class ConnectClient:
@@ -294,6 +315,7 @@ class ConnectClient:
         self.topics_on_records = TopicsOnRecordsOperations(self._session)
         self.user_profiles = UserProfilesOperations(self._session)
         self.users = UsersOperations(self._session, ds)
+        self.manufacturing = _ManufacturingNamespace(self._session)
 
     # ------------------------------------------------------------------
     # Alternate constructors
