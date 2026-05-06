@@ -72,3 +72,8 @@ class TestWarrantySupplierClaim:
         c = await _client(_mock_response(401))
         with pytest.raises(AuthError):
             await c.manufacturing.warranty.supplier_claim(claim_ids=["0ZkSxxx"])
+
+    async def test_raises_when_claim_ids_missing_and_no_body(self):
+        c = await _client(_mock_response(200, {"id": "0Z..."}))
+        with pytest.raises(ValueError, match="claim_ids is required"):
+            await c.manufacturing.warranty.supplier_claim()

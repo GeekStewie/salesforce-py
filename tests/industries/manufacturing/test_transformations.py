@@ -83,3 +83,8 @@ class TestTransformationsRun:
                 usage_type="TransformationMapping",
                 output_object_name="Opportunity",
             )
+
+    async def test_raises_when_required_args_missing_and_no_body(self):
+        c = await _client(_mock_response(200, {"jobId": "0sx"}))
+        with pytest.raises(ValueError, match="input_object_ids, input_object_name"):
+            await c.manufacturing.transformations.run()

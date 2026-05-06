@@ -120,3 +120,8 @@ class TestSampleManagementCreate:
             await c.manufacturing.sample_management.create(
                 operation="Insert", spec={"Name": "X"}
             )
+
+    async def test_raises_when_required_args_missing_and_no_body(self):
+        c = await _client(_mock_response(200, {"requestUniqueId": "x"}))
+        with pytest.raises(ValueError, match="operation and spec are required"):
+            await c.manufacturing.sample_management.create()
