@@ -91,12 +91,6 @@ from salesforce_py.connect.operations.knowledge import (
     KnowledgeArticleViewStatOperations,
 )
 from salesforce_py.connect.operations.managed_topics import ManagedTopicsOperations
-from salesforce_py.industries.manufacturing import (
-    SalesAgreementsOperations,
-    SampleManagementOperations,
-    TransformationsOperations,
-    WarrantyOperations,
-)
 from salesforce_py.connect.operations.microsites import MicrositesOperations
 from salesforce_py.connect.operations.motifs import MotifsOperations
 from salesforce_py.connect.operations.named_credentials import (
@@ -162,6 +156,12 @@ from salesforce_py.connect.operations.topics_on_records import (
 from salesforce_py.connect.operations.users import (
     UserProfilesOperations,
     UsersOperations,
+)
+from salesforce_py.industries.manufacturing import (
+    SalesAgreementsOperations,
+    SampleManagementOperations,
+    TransformationsOperations,
+    WarrantyOperations,
 )
 
 
