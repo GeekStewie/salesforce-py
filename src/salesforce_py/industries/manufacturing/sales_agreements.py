@@ -41,9 +41,7 @@ class SalesAgreementsOperations(ConnectBaseOperations):
         """
         if body is None:
             if source_object_id is None:
-                raise ValueError(
-                    "source_object_id is required when body is not supplied"
-                )
+                raise ValueError("source_object_id is required when body is not supplied")
             body = {"sourceObjectId": source_object_id}
             if sales_agreement_default_values is not None:
                 body["salesAgreementDefaultValues"] = sales_agreement_default_values

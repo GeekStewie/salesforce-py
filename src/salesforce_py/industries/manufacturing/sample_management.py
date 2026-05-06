@@ -49,9 +49,7 @@ class SampleManagementOperations(ConnectBaseOperations):
         """
         if body is None:
             if operation is None or spec is None:
-                raise ValueError(
-                    "operation and spec are required when body is not supplied"
-                )
+                raise ValueError("operation and spec are required when body is not supplied")
             spec_payload: dict[str, Any] = {"properties": _to_property_list(spec)}
             if versions is not None:
                 spec_payload["productRequirementSpecificationVersions"] = [
