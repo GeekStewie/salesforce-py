@@ -235,6 +235,29 @@ BulkClient              # bulk/client.py — user-facing entry point
 3. Validate inputs against the whitelists in `bulk/_limits.py` before submission
 4. Export the class from `bulk/operations/__init__.py` and wire it into `BulkClient.__init__`
 
+### Industry extensions (`salesforce_py/industries/`)
+
+Industry-specific operation classes that wire into existing top-level clients
+rather than introducing new ones. The `industries/` directory is purely a
+source-tree organizational layer — there is no `IndustriesClient`, no new
+session, no new pyproject extra, no new env-var prefix.
+
+The first slice is `industries/manufacturing/`, which adds four operation
+classes (`SalesAgreementsOperations`, `SampleManagementOperations`,
+`TransformationsOperations`, `WarrantyOperations`) covering the four
+Manufacturing Cloud Business API resources. They subclass the existing
+`ConnectBaseOperations` and are wired into `ConnectClient.__init__` as a
+small `_ManufacturingNamespace` container exposed as
+`client.manufacturing.*`. The warranty operation hits
+`/connect/warranty/supplier-claim` despite being grouped under
+`manufacturing.*` — Salesforce documents it inside the Manufacturing Cloud
+guide but its URL path is a sibling, not a child.
+
+Future industries (`industries/financial_services/`, `industries/health/`,
+…) follow the same pattern: implementation files live under
+`industries/<industry>/`, and they get wired into whichever existing client
+matches each endpoint's URL.
+
 ## Exceptions
 
 All exceptions live in `salesforce_py/exceptions.py`:
