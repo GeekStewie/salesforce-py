@@ -180,3 +180,4 @@ cython_debug/
 .cursorignore
 .cursorindexingignore
 .claude/settings.local.json
+.claude/worktrees/sad-newton-760871/
